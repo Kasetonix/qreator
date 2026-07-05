@@ -5,7 +5,7 @@
 
 #include "vis.h"
 #include "data_structs.h"
-#include "algs.h"
+#include "qrcode_gen.h"
 
 int main(void) {
     u8 qrcode_version;

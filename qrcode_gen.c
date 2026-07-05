@@ -1,4 +1,4 @@
-#include "algs.h"
+#include "qrcode_gen.h"
 
 static void add_position_detection(QR_Code *qrcode) {
     size_t size;
@@ -6,9 +6,8 @@ static void add_position_detection(QR_Code *qrcode) {
     size = qrcode->size;
     matrix = qrcode->matrix;
     
-    // top-left corner
-    for (size_t y = 0; y < POSDET_MARKER_SIZE; y++)
-        for (size_t x = 0; x < POSDET_MARKER_SIZE; x++)
+    for (size_t y = 0; y < POSDET_MARKER_SIZE; y++) {
+        for (size_t x = 0; x < POSDET_MARKER_SIZE; x++) {
             if (x == 0 || x == POSDET_MARKER_SIZE - 1 ||
                 y == 0 || y == POSDET_MARKER_SIZE - 1) {
                 matrix[y][x] = true;
@@ -22,6 +21,8 @@ static void add_position_detection(QR_Code *qrcode) {
                 matrix[y][x + size - POSDET_MARKER_SIZE] = true;
                 matrix[y + size - POSDET_MARKER_SIZE][x] = true;
             }
+        }
+    }
 }
 
 static void add_timing_patterns(QR_Code *qrcode) {

@@ -1,5 +1,5 @@
 CSTD = gnu99
-SRC = utils.c data_structs.c vis.c algs.c qreator.c
+SRC = utils.c data_structs.c  encoding.c qrcode_gen.c vis.c qreator.c
 OBJ = ${SRC:.c=.o}
 # LIBS = -lcurses
 CFLAGS = -std=${CSTD}

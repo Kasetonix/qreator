@@ -1,7 +1,7 @@
 #ifndef VIS
 #define VIS
 
-#include "data_structs.h"
+#include "qrcode_gen.h"
 
 #define DRAW_CHAR      "  "
 #define SIMPLE_VERTICAL_BAR   '|'

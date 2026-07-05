@@ -24,6 +24,5 @@ typedef struct QR_Code {
 void read(String *str);
 void init_qrcode(QR_Code *qrcode, u8 version, ECC_Level ecc_level);
 void alloc_qrcode(QR_Code *qrcode);
-void create_qrcode_blueprint(QR_Code *qrcode);
 
 #endif

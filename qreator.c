@@ -16,7 +16,7 @@ int main(void) {
     init_qrcode(&qrcode, qrcode_version, L);
     alloc_qrcode(&qrcode);
     create_qrcode_blueprint(&qrcode);
-    draw_qrcode(&qrcode);
+    draw_qrcode_small(&qrcode);
 
     free(qrcode.matrix);
     return 0;

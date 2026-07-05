@@ -4,15 +4,27 @@
 #include "data_structs.h"
 
 #define DRAW_CHAR      "  "
-#define VERTICAL_BAR   '|'
-#define HORIZONTAL_BAR '-'
+#define SIMPLE_VERTICAL_BAR   '|'
+#define SIMPLE_HORIZONTAL_BAR '-'
 #define CROSS_CHAR     '+'
+
+#define FULL_BLOCK "█"
+#define BOTTOM_HALF_BLOCK "▄"
+#define TOP_HALF_BLOCK "▀"
+#define EMPTY_BLOCK " "
+#define HORIZONTAL_BORDER "─"
+#define VERTICAL_BORDER "│"
+#define TOP_LEFT_BORDER "┌"
+#define TOP_RIGHT_BORDER "┐"
+#define BOTTOM_LEFT_BORDER "└"
+#define BOTTOM_RIGHT_BORDER "┘"
 
 #define MARGIN 2
 
 #define EC_RESET   "\e[0m"
 #define EC_INVERSE "\e[7m"
 
-void draw_qrcode(QR_Code *qrcode);
+void draw_qrcode_simple(QR_Code *qrcode);
+void draw_qrcode_small(QR_Code *qrcode);
 
 #endif

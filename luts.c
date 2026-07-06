@@ -1,5 +1,9 @@
 #include "luts.h"
 
+char alphanumeric_special[ALPHANUMERIC_SPECIAL_NUM] = {
+    ' ', '$', '%', '*', '+', '-', '.', '/', ':'
+};
+
 u16 qrcode_capacity[VERSION_NUM][ECC_LEVEL_NUM][MODE_NUM] = {
     {
         { 41, 25, 17 }, 

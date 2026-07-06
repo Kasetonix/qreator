@@ -20,7 +20,7 @@ int main(void) {
     encoding_mode = get_encoding_mode(text);
     qrcode_version = get_version(text, encoding_mode, ECC_Q);
 
-    encoding = encode(text, encoding_mode);
+    encoding = encode(text, qrcode_version, encoding_mode, ECC_Q);
 
     for (size_t i = 0; i < encoding.len; i++) {
         printf("%08b ", encoding.elements[i]);

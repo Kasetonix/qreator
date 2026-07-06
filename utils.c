@@ -54,7 +54,7 @@ void pack_into_bytes(u16 *array, size_t array_len, u8 single_size, Array_u8 *pac
 
         packed->elements[packed_i] |= top_bits;
         packed->elements[packed_i + 1] |= bottom_bits;
-        
+
         offset = 8 - (single_size - offset);
         if (offset < 0) {
             offset += 8;
@@ -83,7 +83,7 @@ void pack_into_bytes_var(u16 *array, size_t array_len, u8 *single_size, Array_u8
 
         packed->elements[packed_i] |= top_bits;
         packed->elements[packed_i + 1] |= bottom_bits;
-        
+
         offset = 8 - (single_size[array_i + 1] - offset);
         if (offset < 0) {
             offset += 8;

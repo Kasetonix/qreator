@@ -16,5 +16,5 @@ release: qreator
 qreator: ${OBJ}
 	${CC} ${OBJ} ${LIBS} ${LFLAGS} -o $@
 
-clean: qreator 
+clean: qreator
 	rm -f ${OBJ}

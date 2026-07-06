@@ -14,7 +14,7 @@ static bool is_alphanumeric(char ch) {
         return true;
     if (('A' <= ch) && (ch <= 'Z'))
         return true;
-    for (size_t i = 0; i < ALPHANUMERIC_SPECIAL_NUM; i++) 
+    for (size_t i = 0; i < ALPHANUM_SPECIAL_NUM; i++)
         if (ch == alphanumeric_special[i])
             return true;
     return false;
@@ -23,7 +23,7 @@ static bool is_alphanumeric(char ch) {
 Mode get_encoding_mode(String text) {
     char ch;
     bool numeric = true, alphanumeric = true;
-    
+
     for (size_t i = 0; i < text.len; i++) {
         ch = text.chars[i];
 
@@ -40,7 +40,7 @@ Mode get_encoding_mode(String text) {
     }
 
     if (numeric) return MODE_NUMERIC;
-    if (alphanumeric) return MODE_ALPHANUMERIC;
+    if (alphanumeric) return MODE_ALPHANUM;
     return MODE_BYTE;
 }
 
@@ -54,11 +54,11 @@ u8 get_version(String text, Mode mode, ECC_Level ecc_level) {
 }
 
 size_t get_base_encoding_len(String text, Mode mode) {
-    if (mode == MODE_ALPHANUMERIC) {
+    if (mode == MODE_ALPHANUM) {
         size_t packed_len_bits;
 
-        packed_len_bits = ALPHANUMERIC_FULLWORD_LEN * (text.len / ALPHANUMERIC_GROUP_SIZE)
-                        + (text.len % ALPHANUMERIC_GROUP_SIZE) * 6;
+        packed_len_bits = ALPHANUM_FULLWORD_LEN * (text.len / ALPHANUM_GROUP_SIZE)
+                        + (text.len % ALPHANUM_GROUP_SIZE) * 6;
 
         if (packed_len_bits % 8 != 0)
             return packed_len_bits / 8 + 1;
@@ -135,12 +135,12 @@ static u8 encode_alphanumeric_char(char ch) {
         return ch - '0';
     if (('A' <= ch) && (ch <= 'Z'))
         return ch - 'A' + 10;
-    
-    for (size_t i = 0; i < ALPHANUMERIC_SPECIAL_NUM; i++)
+
+    for (size_t i = 0; i < ALPHANUM_SPECIAL_NUM; i++)
         if (ch == alphanumeric_special[i])
             return i + 36;
 
-    return ALPHANUMERIC_SPECIAL_NUM + 36 + 1;
+    return ALPHANUM_SPECIAL_NUM + 36 + 1;
 }
 
 static Array_u8 encode_alphanumeric(String text) {
@@ -149,29 +149,29 @@ static Array_u8 encode_alphanumeric(String text) {
     u8 left_char, right_char, right_padding, free_bits, offset;
     size_t ie_len;
 
-    ie_len = text.len / ALPHANUMERIC_GROUP_SIZE;
-    if (text.len % ALPHANUMERIC_GROUP_SIZE != 0)
-        right_padding = ALPHANUMERIC_HALFWORD_LEN;
+    ie_len = text.len / ALPHANUM_GROUP_SIZE;
+    if (text.len % ALPHANUM_GROUP_SIZE != 0)
+        right_padding = ALPHANUM_HALFWORD_LEN;
     else
         right_padding = 0;
 
     initial_encoding = malloc(ie_len * sizeof(u16));
 
     for (size_t i = 0; i < ie_len; i++) {
-        left_char = encode_alphanumeric_char(text.chars[ALPHANUMERIC_GROUP_SIZE * i]);
-        right_char = encode_alphanumeric_char(text.chars[ALPHANUMERIC_GROUP_SIZE * i + 1]);
+        left_char = encode_alphanumeric_char(text.chars[ALPHANUM_GROUP_SIZE * i]);
+        right_char = encode_alphanumeric_char(text.chars[ALPHANUM_GROUP_SIZE * i + 1]);
         initial_encoding[i] = 45 * left_char + right_char;
     }
 
-    encoding.len = get_base_encoding_len(text, MODE_ALPHANUMERIC);
+    encoding.len = get_base_encoding_len(text, MODE_ALPHANUM);
     encoding.elements = calloc(encoding.len, sizeof(u8));
-    
-    pack_into_bytes(initial_encoding, ie_len, ALPHANUMERIC_FULLWORD_LEN, &encoding);
 
-    if (text.len % ALPHANUMERIC_GROUP_SIZE != 0) {
+    pack_into_bytes(initial_encoding, ie_len, ALPHANUM_FULLWORD_LEN, &encoding);
+
+    if (text.len % ALPHANUM_GROUP_SIZE != 0) {
         left_char = encode_alphanumeric_char(text.chars[text.len - 1]);
-        free_bits = (8 * encoding.len) - (ie_len * ALPHANUMERIC_FULLWORD_LEN);
-        offset = free_bits - ALPHANUMERIC_HALFWORD_LEN;
+        free_bits = (8 * encoding.len) - (ie_len * ALPHANUM_FULLWORD_LEN);
+        offset = free_bits - ALPHANUM_HALFWORD_LEN;
         encoding.elements[encoding.len - 1] |= left_char << offset;
         if (free_bits > 8)
             encoding.elements[encoding.len - 2] |= left_char >> (8 - offset);
@@ -192,10 +192,10 @@ static Array_u8 encode_byte(String text) {
     return encoding;
 }
 
-Array_u8 encode(String text, Mode mode) {
+Array_u8 encode(String text, u8 version, Mode mode, ECC_Level ecc_level) {
     switch (mode) {
         case MODE_NUMERIC: return encode_numeric(text); break;
-        case MODE_ALPHANUMERIC: return encode_alphanumeric(text); break;
+        case MODE_ALPHANUM: return encode_alphanumeric(text); break;
         case MODE_BYTE: return encode_byte(text); break;
     }
 }

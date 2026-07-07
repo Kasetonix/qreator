@@ -178,7 +178,7 @@ Array_u8 packed_encoding(String text, ECC_Level ecc_level) {
     mode = get_encoding_mode(text);
     version = get_version(text, mode, ecc_level);
 
-    packed.len = codeword_num[version-1][ecc_level][0];
+    packed.len = data_codeword_num[version-1][ecc_level];
     packed.elems = malloc(packed.len * sizeof(u8));
 
     encode(text, version, mode, ecc_level, &encoding, &word_lengths);

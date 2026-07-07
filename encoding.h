@@ -37,8 +37,6 @@
 #define PAD_BYTE_LEFT  0b11101100
 #define PAD_BYTE_RIGHT 0b00010001
 
-typedef uint8_t u8;
-
 typedef enum Mode { MODE_NUMERIC, MODE_ALPHANUM, MODE_BYTE } Mode;
 typedef enum ECC_Level { ECC_L, ECC_M, ECC_Q, ECC_H } ECC_Level;
 

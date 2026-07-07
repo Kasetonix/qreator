@@ -140,7 +140,8 @@ static void encode_alphanumeric(String text, u8 version, Array_u16 *encoding, u8
 
 static void encode_byte(String text, u8 version, Array_u16 *encoding, u8 **word_lengths) {
     encoding->len = 2 + text.len;
-    encoding->elems = malloc(text.len * sizeof(u8));
+    encoding->elems = malloc(text.len * sizeof(u16));
+    *word_lengths = malloc(text.len * sizeof(u8));
 
     encoding->elems[0] = MODE_INDICATOR_BYTE;
     (*word_lengths)[0] = MODE_INDICATOR_LEN;
@@ -160,10 +161,19 @@ Array_u8 encode(String text, u8 version, Mode mode, ECC_Level ecc_level) {
     Array_u16 encoding;
     u8 *word_lengths;
 
+    encoding.len = 0;
+    encoding.elems = NULL;
+
+    printf("%hhu\n", version);
+
     switch (mode) {
         case MODE_NUMERIC: encode_numeric(text, version, &encoding, &word_lengths); break;
         case MODE_ALPHANUM: encode_alphanumeric(text, version, &encoding, &word_lengths); break;
         case MODE_BYTE: encode_byte(text, version, &encoding, &word_lengths); break;
+    }
+
+    for (size_t i = 0; i < encoding.len; i++) {
+        printf("%0*b ", word_lengths[i], encoding.elems[i]);
     }
 
     return codewords;

@@ -38,32 +38,28 @@ String pack_into_string(char *str) {
     return string;
 }
 
-// FIX: potentially rewrite 
 void pack_into_bytes(u16 *array, size_t array_len, u8 *word_length, Array_u8 *packed) {
-    size_t array_i, packed_i, packed_len;
-    i8 offset;
-    u8 top_bits, bottom_bits;
-    u16 bits;
+    size_t position;
+    u8 container, left, space, mask;
 
-    offset = 16 - word_length[0];
-
-    array_i = 0; packed_i = 0;
-    while (array_i < array_len) {
-        bits = array[array_i] << offset;
-        top_bits = (bits & 0xFF00) >> 8;
-        bottom_bits = bits & 0x00FF;
-
-        packed->elems[packed_i] |= top_bits;
-        packed->elems[packed_i + 1] |= bottom_bits;
-
-        offset = 8 - (word_length[array_i + 1] - offset);
-        if (offset < 0) {
-            offset += 8;
-            packed->elems[packed_i + 1] |= (array[array_i + 1] >> (16 - offset));
-            packed_i++;
+    position = 0;
+    for (size_t i = 0; i < array_len; i++) {
+        left = word_length[i];
+        while (left > 0) {
+            space = 8 - position % 8;
+            if (left > space) {
+                mask = (1 << space) - 1;
+                container = (array[i] >> (left - space)) & mask;
+                packed->elems[position / 8] |= container;
+                position += space;
+                left -= space;
+            } else {
+                mask = (1 << left) - 1;
+                container = (array[i] & mask) << (space - left);
+                packed->elems[position / 8] |= container;
+                position += left;
+                left = 0;
+            }
         }
-
-        array_i++;
-        packed_i++;
     }
 }

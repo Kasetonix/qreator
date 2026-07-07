@@ -183,10 +183,6 @@ Array_u8 packed_encoding(String text, ECC_Level ecc_level) {
 
     encode(text, version, mode, ecc_level, &encoding, &word_lengths);
 
-    for (size_t i = 0; i < encoding.len; i++) {
-        printf("%0*b\n", word_lengths[i], encoding.elems[i]);
-    } putchar('\n');
-
     bitstring_len = 0;
     for (size_t i = 0; i < encoding.len; i++) {
         bitstring_len += word_lengths[i];
@@ -197,8 +193,6 @@ Array_u8 packed_encoding(String text, ECC_Level ecc_level) {
         bitstring_len += len_diff <= MAX_TERMINATOR_LEN ? len_diff : MAX_TERMINATOR_LEN;
     }
     bitstring_len += (8 - bitstring_len % 8);
-
-    printf("%zu\n", bitstring_len);
 
     pack_into_bytes(encoding.elems, encoding.len, word_lengths, &packed);
 

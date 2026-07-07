@@ -38,13 +38,14 @@ String pack_into_string(char *str) {
     return string;
 }
 
-void pack_into_bytes(u16 *array, size_t array_len, u8 single_size, Array_u8 *packed) {
+// FIX: potentially rewrite 
+void pack_into_bytes(u16 *array, size_t array_len, u8 *word_length, Array_u8 *packed) {
     size_t array_i, packed_i, packed_len;
     i8 offset;
     u8 top_bits, bottom_bits;
     u16 bits;
 
-    offset = 16 - single_size;
+    offset = 16 - word_length[0];
 
     array_i = 0; packed_i = 0;
     while (array_i < array_len) {
@@ -55,36 +56,7 @@ void pack_into_bytes(u16 *array, size_t array_len, u8 single_size, Array_u8 *pac
         packed->elems[packed_i] |= top_bits;
         packed->elems[packed_i + 1] |= bottom_bits;
 
-        offset = 8 - (single_size - offset);
-        if (offset < 0) {
-            offset += 8;
-            packed->elems[packed_i + 1] |= (array[array_i + 1] >> (16 - offset));
-            packed_i++;
-        }
-
-        array_i++;
-        packed_i++;
-    }
-}
-
-void pack_into_bytes_var(u16 *array, size_t array_len, u8 *single_size, Array_u8 *packed) {
-    size_t array_i, packed_i, packed_len;
-    i8 offset;
-    u8 top_bits, bottom_bits;
-    u16 bits;
-
-    offset = 16 - single_size[0];
-
-    array_i = 0; packed_i = 0;
-    while (array_i < array_len) {
-        bits = array[array_i] << offset;
-        top_bits = (bits & 0xFF00) >> 8;
-        bottom_bits = bits & 0x00FF;
-
-        packed->elems[packed_i] |= top_bits;
-        packed->elems[packed_i + 1] |= bottom_bits;
-
-        offset = 8 - (single_size[array_i + 1] - offset);
+        offset = 8 - (word_length[array_i + 1] - offset);
         if (offset < 0) {
             offset += 8;
             packed->elems[packed_i + 1] |= (array[array_i + 1] >> (16 - offset));

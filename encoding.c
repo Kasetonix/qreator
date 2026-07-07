@@ -166,3 +166,48 @@ void encode(String text, u8 version, Mode mode, ECC_Level ecc_level, Array_u16 *
             encode_byte(text, version, encoding, word_lengths); break;
     }
 }
+
+Array_u8 packed_encoding(String text, ECC_Level ecc_level) {
+    Array_u8 packed;
+    Mode mode;
+    u8 version;
+    u8 *word_lengths;
+    Array_u16 encoding;
+    size_t bitstring_len, len_diff;
+
+    mode = get_encoding_mode(text);
+    version = get_version(text, mode, ecc_level);
+
+    packed.len = codeword_num[version-1][ecc_level][0];
+    packed.elems = malloc(packed.len * sizeof(u8));
+
+    encode(text, version, mode, ecc_level, &encoding, &word_lengths);
+
+    for (size_t i = 0; i < encoding.len; i++) {
+        printf("%0*b\n", word_lengths[i], encoding.elems[i]);
+    } putchar('\n');
+
+    bitstring_len = 0;
+    for (size_t i = 0; i < encoding.len; i++) {
+        bitstring_len += word_lengths[i];
+    }
+
+    len_diff = packed.len - bitstring_len;
+    if (len_diff > 0) {
+        bitstring_len += len_diff <= MAX_TERMINATOR_LEN ? len_diff : MAX_TERMINATOR_LEN;
+    }
+    bitstring_len += (8 - bitstring_len % 8);
+
+    printf("%zu\n", bitstring_len);
+
+    pack_into_bytes(encoding.elems, encoding.len, word_lengths, &packed);
+
+    for (size_t i = bitstring_len / 8; i < packed.len; i++) {
+        if (i % 2 == 0) packed.elems[i] = PAD_BYTE_LEFT;
+        else            packed.elems[i] = PAD_BYTE_RIGHT; 
+    }
+
+    free(encoding.elems);
+    free(word_lengths);
+    return packed;
+}

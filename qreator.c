@@ -14,7 +14,7 @@ int main(void) {
     Array_u8 encoding;
     Mode encoding_mode;
 
-    fputs("Enter the message: ", stdout);
+    // fputs("Enter the message: ", stdout);
     read(&text);
 
     encoding_mode = get_encoding_mode(text);
@@ -22,9 +22,9 @@ int main(void) {
 
     encoding = encode(text, qrcode_version, encoding_mode, ECC_Q);
 
-    for (size_t i = 0; i < encoding.len; i++) {
-        printf("%08b ", encoding.elements[i]);
-    } putchar('\n');
+    // for (size_t i = 0; i < encoding.len; i++) {
+    //     printf("%08b ", encoding.elems[i]);
+    // } putchar('\n');
 
     return 0;
 
@@ -34,7 +34,7 @@ int main(void) {
     draw_qrcode_small(&qrcode);
 
     free(text.chars);
-    free(encoding.elements);
+    free(encoding.elems);
     free(qrcode.matrix);
     return 0;
 }

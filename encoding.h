@@ -30,6 +30,8 @@
 #define ALPHANUM_FULLWORD_LEN 11
 #define ALPHANUM_HALFWORD_LEN 6
 
+#define BYTE_WORD_LEN 8
+
 typedef uint8_t u8;
 
 typedef enum Mode { MODE_NUMERIC, MODE_ALPHANUM, MODE_BYTE } Mode;

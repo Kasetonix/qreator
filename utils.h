@@ -15,8 +15,13 @@ typedef struct String {
 
 typedef struct Array_u8 {
     size_t len;
-    u8 *elements;
+    u8 *elems;
 } Array_u8;
+
+typedef struct Array_u16 {
+    size_t len;
+    u16 *elems;
+} Array_u16;
 
 void warning(char *msg);
 void error(char *msg);

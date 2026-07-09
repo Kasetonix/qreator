@@ -167,21 +167,16 @@ void encode(String text, u8 version, Mode mode, ECC_Level ecc_level, Array_u16 *
     }
 }
 
-Array_u8 packed_encoding(String text, ECC_Level ecc_level) {
+Array_u8 packed_encoding(String text, Mode encoding_mode, u8 version, ECC_Level ecc_level) {
     Array_u8 packed;
-    Mode mode;
-    u8 version;
     u8 *word_lengths;
     Array_u16 encoding;
     size_t bitstring_len, len_diff;
 
-    mode = get_encoding_mode(text);
-    version = get_version(text, mode, ecc_level);
-
     packed.len = data_codeword_num[version-1][ecc_level];
     packed.elems = malloc(packed.len * sizeof(u8));
 
-    encode(text, version, mode, ecc_level, &encoding, &word_lengths);
+    encode(text, version, encoding_mode, ecc_level, &encoding, &word_lengths);
 
     bitstring_len = 0;
     for (size_t i = 0; i < encoding.len; i++) {

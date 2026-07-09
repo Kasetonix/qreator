@@ -17,6 +17,7 @@ typedef uint16_t u16;
 extern char alphanumeric_special[ALPHANUM_SPECIAL_NUM];
 extern u16 qrcode_capacity[VERSION_NUM][ECC_LEVEL_NUM][MODE_NUM];
 extern u16 data_codeword_num[VERSION_NUM][ECC_LEVEL_NUM];
+extern u8 ec_codewords_per_block[VERSION_NUM][ECC_LEVEL_NUM];
 extern u8 block_division[VERSION_NUM][ECC_LEVEL_NUM][4];
 extern u8 gf256_log2_table[256];
 extern u8 gf256_antilog2_table[256];

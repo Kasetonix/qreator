@@ -9,8 +9,7 @@ typedef struct Polynomial {
     u8 degree;
 } Polynomial;
 
-Polynomial create_generator_polynomial(u8 version, ECC_Level ecc_level);
-u8 * generate_ec_codewords(Array_u8 *encoding, Polynomial *gen_pol);
-Array_u8 interleaved_ec_codewords(Array_u8 *encoding, u8 version, ECC_Level ecc_level);
+Array_u8 interleaved_ec_codewords(Array_u8 *data_codewords, u8 version, ECC_Level ecc_level);
+Array_u8 interleaved_data_codewords(Array_u8 *data_codewords, u8 version, ECC_Level ecc_level);
 
 #endif

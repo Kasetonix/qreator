@@ -22,7 +22,7 @@ static void mult_pol_by_mon(Polynomial *pol, u8 mon_coeff) {
         pol->coeff[i] ^= gf256_mult(pol->coeff[i + 1], mon_coeff);
 }
 
-Polynomial create_generator_polynomial(u8 version, ECC_Level ecc_level) {
+static Polynomial create_generator_polynomial(u8 version, ECC_Level ecc_level) {
     Polynomial gen_pol;
     u8 deg;
 
@@ -37,7 +37,7 @@ Polynomial create_generator_polynomial(u8 version, ECC_Level ecc_level) {
     return gen_pol;
 }
 
-u8 * generate_ec_codewords(Array_u8 *encoding, Polynomial *gen_pol) {
+static u8 * generate_ec_codewords(Array_u8 *encoding, Polynomial *gen_pol) {
     u8 *ec_codewords;
     u8 gen_offset, steps, top_coeff;
 
@@ -71,8 +71,8 @@ u8 * generate_ec_codewords(Array_u8 *encoding, Polynomial *gen_pol) {
     return ec_codewords;
 }
 
-Array_u8 interleaved_ec_codewords(Array_u8 *encoding, u8 version, ECC_Level ecc_level) {
-    Array_u8 interleaved_eccs, encoding_block;
+Array_u8 interleaved_ec_codewords(Array_u8 *data_codewords, u8 version, ECC_Level ecc_level) {
+    Array_u8 interleaved_eccs, dc_block;
     u8 **eccs;
     u8 block_number, eccs_per_block;
     u8 *block_div;
@@ -88,18 +88,18 @@ Array_u8 interleaved_ec_codewords(Array_u8 *encoding, u8 version, ECC_Level ecc_
     interleaved_eccs.elems = malloc(interleaved_eccs.len * sizeof(u8));
 
     eccs = malloc(block_number * sizeof(Array_u8));
-    encoding_block.elems = encoding->elems;
-    encoding_block.len = block_div[IND_G1_CODEWORD_PER_BLOCK];
+    dc_block.elems = data_codewords->elems;
+    dc_block.len = block_div[IND_G1_CODEWORD_PER_BLOCK];
 
     for (u8 i = 0; i < block_div[IND_G1_BLOCKS]; i++) {
-        eccs[i] = generate_ec_codewords(&encoding_block, &gen_pol);
-        encoding_block.elems += encoding_block.len;
+        eccs[i] = generate_ec_codewords(&dc_block, &gen_pol);
+        dc_block.elems += dc_block.len;
     }
 
-    encoding_block.len = block_div[IND_G2_CODEWORD_PER_BLOCK];
+    dc_block.len = block_div[IND_G2_CODEWORD_PER_BLOCK];
     for (u8 i = block_div[IND_G1_BLOCKS]; i < block_number; i++) {
-        eccs[i] = generate_ec_codewords(&encoding_block, &gen_pol);
-        encoding_block.elems += encoding_block.len;
+        eccs[i] = generate_ec_codewords(&dc_block, &gen_pol);
+        dc_block.elems += dc_block.len;
     }
 
     for (u8 i = 0; i < eccs_per_block; i++)
@@ -111,4 +111,44 @@ Array_u8 interleaved_ec_codewords(Array_u8 *encoding, u8 version, ECC_Level ecc_
     free(eccs);
     free(gen_pol.coeff);
     return interleaved_eccs;
+}
+
+Array_u8 interleaved_data_codewords(Array_u8 *data_codewords, u8 version, ECC_Level ecc_level) {
+    Array_u8 interleaved_dcs;
+    u8 i, block_number, col_number;
+    u8 *block_div, *dc_ptr;
+    
+    block_div = block_division[version][ecc_level];
+    block_number = block_div[IND_G1_BLOCKS] + block_div[IND_G2_BLOCKS];
+    if (block_div[IND_G1_CODEWORD_PER_BLOCK] > block_div[IND_G2_CODEWORD_PER_BLOCK])
+        col_number = block_div[IND_G1_CODEWORD_PER_BLOCK];
+    else
+        col_number = block_div[IND_G2_CODEWORD_PER_BLOCK];
+
+
+    interleaved_dcs.len = data_codewords->len;
+    interleaved_dcs.elems = malloc(interleaved_dcs.len * sizeof(u8));
+
+
+    i = 0;
+    for (u8 col = 0; col < col_number; col++) {
+        dc_ptr = &data_codewords->elems[col];
+        for (u8 block_ind = 0; block_ind < block_div[IND_G1_BLOCKS]; block_ind++) {
+            if (col < block_div[IND_G1_CODEWORD_PER_BLOCK]) {
+                interleaved_dcs.elems[i] = *dc_ptr;
+                i++;
+            }
+            dc_ptr += block_div[IND_G1_CODEWORD_PER_BLOCK];
+        }
+
+        for (u8 block_ind = block_div[IND_G1_BLOCKS]; block_ind < block_number; block_ind++) {
+            if (col < block_div[IND_G2_CODEWORD_PER_BLOCK]) {
+                interleaved_dcs.elems[i] = *dc_ptr;
+                i++;
+            }
+            dc_ptr += block_div[IND_G2_CODEWORD_PER_BLOCK];
+        }
+    }
+
+    return interleaved_dcs;
 }

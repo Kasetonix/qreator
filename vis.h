@@ -4,6 +4,8 @@
 #include "utils.h"
 #include "qrcode_gen.h"
 
+#define DARK_MODE true
+
 #define DRAW_CHAR      "  "
 #define SIMPLE_VERTICAL_BAR   '|'
 #define SIMPLE_HORIZONTAL_BAR '-'
@@ -25,7 +27,6 @@
 #define EC_RESET   "\033[0m"
 #define EC_INVERSE "\033[7m"
 
-void draw_qrcode_simple(QR_Code *qrcode);
 void draw_qrcode_small(QR_Code *qrcode);
 
 #endif

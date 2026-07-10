@@ -71,7 +71,7 @@ static u8 * generate_ec_codewords(Array_u8 *encoding, Polynomial *gen_pol) {
     return ec_codewords;
 }
 
-Array_u8 interleaved_ec_codewords(Array_u8 *data_codewords, u8 version, ECC_Level ecc_level) {
+static Array_u8 interleaved_ec_codewords(Array_u8 *data_codewords, u8 version, ECC_Level ecc_level) {
     Array_u8 interleaved_eccs, dc_block;
     u8 **eccs;
     u8 block_number, eccs_per_block;
@@ -113,7 +113,7 @@ Array_u8 interleaved_ec_codewords(Array_u8 *data_codewords, u8 version, ECC_Leve
     return interleaved_eccs;
 }
 
-Array_u8 interleaved_data_codewords(Array_u8 *data_codewords, u8 version, ECC_Level ecc_level) {
+static Array_u8 interleaved_data_codewords(Array_u8 *data_codewords, u8 version, ECC_Level ecc_level) {
     Array_u8 interleaved_dcs;
     u8 i, block_number, col_number;
     u8 *block_div, *dc_ptr;
@@ -128,7 +128,6 @@ Array_u8 interleaved_data_codewords(Array_u8 *data_codewords, u8 version, ECC_Le
 
     interleaved_dcs.len = data_codewords->len;
     interleaved_dcs.elems = malloc(interleaved_dcs.len * sizeof(u8));
-
 
     i = 0;
     for (u8 col = 0; col < col_number; col++) {
@@ -151,4 +150,24 @@ Array_u8 interleaved_data_codewords(Array_u8 *data_codewords, u8 version, ECC_Le
     }
 
     return interleaved_dcs;
+}
+
+Array_u8 final_codewords(Array_u8 *data_codewords, u8 version, ECC_Level ecc_level) {
+    Array_u8 codewords, iecc, idc;
+
+    iecc = interleaved_ec_codewords(data_codewords, version, ecc_level);
+    idc  = interleaved_data_codewords(data_codewords, version, ecc_level);
+
+    codewords.len = iecc.len + idc.len + 1;
+    codewords.elems = malloc(codewords.len * sizeof(u8));
+
+    for (size_t i = 0; i < idc.len; i++)
+        codewords.elems[i] = idc.elems[i];
+    for (size_t i = 0; i < iecc.len; i++)
+        codewords.elems[i + idc.len] = iecc.elems[i];
+    codewords.elems[codewords.len - 1] = 0;
+
+    free(iecc.elems);
+    free(idc.elems);
+    return codewords;
 }

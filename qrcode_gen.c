@@ -7,7 +7,6 @@
 #include "encoding.h"
 #include "luts.h"
 #include "utils.h"
-#include "vis.h"
 
 void init_qrcode(QR_Code *qrcode, u8 version, Mode mode, ECC_Level ecc_level) {
     if (version >= 40)     error("Invalid QR code version.");
@@ -32,6 +31,26 @@ void alloc_qrcode(QR_Code *qrcode) {
         if (qrcode->matrix[y] == NULL)
             error("Couldn't allocate qrcode array.");
     }
+}
+
+QR_Code copy_qrcode(QR_Code *qrcode) {
+    QR_Code copy;
+    u8 **matrix;
+
+    matrix = qrcode->matrix;
+    copy.version = qrcode->version;
+    copy.size = qrcode->size;
+    copy.mode = qrcode->mode;
+    copy.ecc_level = qrcode->ecc_level;
+    copy.matrix = NULL;
+
+    alloc_qrcode(&copy);
+
+    for (size_t y = 0; y < copy.size; y++)
+        for (size_t x = 0; x < copy.size; x++)
+            copy.matrix[y][x] = qrcode->matrix[y][x];
+
+    return copy;
 }
 
 static void add_position_detection(QR_Code *qrcode) {
@@ -176,6 +195,10 @@ void create_qrcode_blueprint(QR_Code *qrcode) {
         touch_version_area(qrcode);
 }
 
+static inline bool is_blueprint(QR_Code *qrcode, size_t y, size_t x) {
+    return (qrcode->matrix[y][x] & BLUEPRINT_MARKER) == BLUEPRINT_MARKER;
+}
+
 static Pos next_module_pos(QR_Code *qrcode, Pos pos) {
     static bool upwards = true;
     static bool horizontal = false;
@@ -214,7 +237,7 @@ static Pos next_module_pos(QR_Code *qrcode, Pos pos) {
             np.x < 0 || np.x >= (ssize_t) qrcode->size) {
             return (Pos) { .y = 0, .x = 0 };
         }
-    } while ((qrcode->matrix[np.y][np.x] & BLUEPRINT_MARKER) == BLUEPRINT_MARKER);
+    } while (is_blueprint(qrcode, np.y, np.x));
 
     return np;
 }
@@ -229,12 +252,11 @@ void add_codewords(QR_Code *qrcode, Array_u8 codewords) {
     for (size_t i = 0; i < codewords.len; i++) {
         codeword = codewords.elems[i];
         for (u8 j = 0; j < 8; j++) {
-            if (((codeword >> j) & 1) == 1)
+            // if (((codeword >> j) & 1) == 1)
                 matrix[pos.y][pos.x] |= ON_MARKER;
             pos = next_module_pos(qrcode, pos);
-            if (pos.x == 0 && pos.y == 0 && i != codewords.len - 1 && j != 7) {
+            if (pos.x == 0 && pos.y == 0 && i != codewords.len - 1 && j != 7)
                 error("Went out of the qr code when writing codewords!");
-            }
         }
     }
 }
@@ -243,4 +265,36 @@ void remove_touch_markers(QR_Code *qrcode) {
     for (size_t y = 0; y < qrcode->size; y++)
         for (size_t x = 0; x < qrcode->size; x++)
             qrcode->matrix[y][x] >>= 1;
+}
+
+static inline bool mask0_func(size_t y, size_t x) { return (y + x) % 2 == 0; }
+static inline bool mask1_func(size_t y, size_t x) { x = x; return y % 2 == 0; }
+static inline bool mask2_func(size_t y, size_t x) { y = y; return x % 3 == 0; }
+static inline bool mask3_func(size_t y, size_t x) { return (y + x) % 3 == 0; }
+static inline bool mask4_func(size_t y, size_t x) { return (y / 2 + x / 3) % 2 == 0; }
+static inline bool mask5_func(size_t y, size_t x) { return ((y * x) % 2) + ((y * x) % 3) == 0; }
+static inline bool mask6_func(size_t y, size_t x) { return (((y * x) % 2) + ((y * x) % 3)) % 2 == 0; }
+static inline bool mask7_func(size_t y, size_t x) { return (((y + x) % 2) + ((y * x) % 3)) % 2 == 0; }
+
+void apply_mask(QR_Code *qrcode, u8 mask_number) {
+    bool (*mask_func)(size_t, size_t);
+
+    if (mask_number >= MASK_NUMBER)
+        error("Incorrect mask number.");
+
+    switch (mask_number) {
+        case 0: mask_func = mask0_func; break;    
+        case 1: mask_func = mask1_func; break;    
+        case 2: mask_func = mask2_func; break;    
+        case 3: mask_func = mask3_func; break;    
+        case 4: mask_func = mask4_func; break;    
+        case 5: mask_func = mask5_func; break;    
+        case 6: mask_func = mask6_func; break;    
+        case 7: mask_func = mask7_func; break;    
+    }
+
+    for (size_t y = 0; y < qrcode->size; y++)
+        for (size_t x = 0; x < qrcode->size; x++)
+            if (!is_blueprint(qrcode, y, x) && mask_func(y, x))
+                qrcode->matrix[y][x] ^= ON_MARKER;
 }

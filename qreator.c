@@ -15,7 +15,7 @@ int main(void) {
     u8 qrcode_version;
     Mode encoding_mode;
     ECC_Level ecc_level;
-    QR_Code qrcode;
+    QR_Code qrcode, masked_qrcode;
 
     // fputs("Enter the message: ", stdout);
     read(&text);
@@ -33,12 +33,21 @@ int main(void) {
     alloc_qrcode(&qrcode);
     create_qrcode_blueprint(&qrcode);
     add_codewords(&qrcode, codewords);
+    masked_qrcode = copy_qrcode(&qrcode);
+    apply_mask(&masked_qrcode, 0);
     remove_touch_markers(&qrcode);
+    remove_touch_markers(&masked_qrcode);
     draw_qrcode_small(&qrcode);
+    draw_qrcode_small(&masked_qrcode);
 
     free(codewords.elems);
+
     for (size_t i = 0; i < qrcode.size; i++)
         free(qrcode.matrix[i]);
     free(qrcode.matrix);
+
+    for (size_t i = 0; i < masked_qrcode.size; i++)
+        free(masked_qrcode.matrix[i]);
+    free(masked_qrcode.matrix);
     return 0;
 }

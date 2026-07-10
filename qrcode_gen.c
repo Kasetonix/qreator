@@ -8,11 +8,11 @@
 #include "utils.h"
 
 void init_qrcode(QR_Code *qrcode, u8 version, Mode mode, ECC_Level ecc_level) {
-    if (version < 1 || version > 40) error("Invalid QR code version.");
-    if (mode > MODE_BYTE)            error("Invalid encoding mode.");
-    if (ecc_level > ECC_H)           error("Invalid ECC level.");
+    if (version >= 40)     error("Invalid QR code version.");
+    if (mode > MODE_BYTE)  error("Invalid encoding mode.");
+    if (ecc_level > ECC_H) error("Invalid ECC level.");
 
-    qrcode->size = 17 + 4 * version;
+    qrcode->size = 17 + 4 * (version + 1);
     qrcode->mode = mode;
     qrcode->ecc_level = ecc_level;
     qrcode->matrix = NULL;

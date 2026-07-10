@@ -42,7 +42,7 @@ typedef enum ECC_Level { ECC_L, ECC_M, ECC_Q, ECC_H } ECC_Level;
 
 Mode get_encoding_mode(String text);
 u8 get_version(String text, Mode mode, ECC_Level ecc_level);
-void encode(String text, u8 version, Mode mode, ECC_Level ecc_level, Array_u16 *encoding, u8 **word_lengths);
+void encode(String text, u8 version, Mode mode, Array_u16 *encoding, u8 **word_lengths);
 Array_u8 packed_encoding(String text, Mode encoding_mode, u8 version, ECC_Level ecc_level);
 
 #endif

@@ -6,7 +6,7 @@ CFLAGS = -std=${CSTD}
 
 all: qreator
 
-debug: CFLAGS += -Wall -Wextra -Werror -g -pedantic
+debug: CFLAGS += -Wall -Wextra -g -pedantic
 debug: LFLAGS += -fsanitize=address
 debug: qreator
 

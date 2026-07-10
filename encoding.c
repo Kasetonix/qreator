@@ -50,7 +50,7 @@ u8 get_version(String text, Mode mode, ECC_Level ecc_level) {
         if (qrcode_capacity[version][ecc_level][mode] >= text.len)
             break;
 
-    return version + 1;
+    return version;
 }
 
 static void encode_numeric(String text, u8 version, Array_u16 *encoding, u8 **word_lengths) {
@@ -64,9 +64,9 @@ static void encode_numeric(String text, u8 version, Array_u16 *encoding, u8 **wo
     encoding->elems[0] = MODE_INDICATOR_NUMERIC;
     (*word_lengths)[0] = MODE_INDICATOR_LEN;
     encoding->elems[1] = text.len;
-    if (version <= 9)       (*word_lengths)[1] = LEN_INDICATOR_NUMERIC_9_LEN;
-    else if (version <= 26) (*word_lengths)[1] = LEN_INDICATOR_NUMERIC_26_LEN;
-    else                    (*word_lengths)[1] = LEN_INDICATOR_NUMERIC_40_LEN;
+    if (version < 9)       (*word_lengths)[1] = LEN_INDICATOR_NUMERIC_9_LEN;
+    else if (version < 26) (*word_lengths)[1] = LEN_INDICATOR_NUMERIC_26_LEN;
+    else                   (*word_lengths)[1] = LEN_INDICATOR_NUMERIC_40_LEN;
 
     for (size_t i = 2; i < encoding->len - (leftover > 0 ? 1 : 0); i++) {
         digit1 = text.chars[NUMERIC_GROUP_SIZE * (i - 2)] - '0';
@@ -120,9 +120,9 @@ static void encode_alphanumeric(String text, u8 version, Array_u16 *encoding, u8
     encoding->elems[0] = MODE_INDICATOR_ALPHANUM;
     (*word_lengths)[0] = MODE_INDICATOR_LEN;
     encoding->elems[1] = text.len;
-    if (version <= 9)       (*word_lengths)[1] = LEN_INDICATOR_ALPHANUM_9_LEN;
-    else if (version <= 26) (*word_lengths)[1] = LEN_INDICATOR_ALPHANUM_26_LEN;
-    else                    (*word_lengths)[1] = LEN_INDICATOR_ALPHANUM_40_LEN;
+    if (version < 9)       (*word_lengths)[1] = LEN_INDICATOR_ALPHANUM_9_LEN;
+    else if (version < 26) (*word_lengths)[1] = LEN_INDICATOR_ALPHANUM_26_LEN;
+    else                   (*word_lengths)[1] = LEN_INDICATOR_ALPHANUM_40_LEN;
 
     for (size_t i = 2; i < encoding->len - leftover; i++) {
         left_char = encode_alphanumeric_char(text.chars[ALPHANUM_GROUP_SIZE * (i - 2)]);
@@ -146,9 +146,9 @@ static void encode_byte(String text, u8 version, Array_u16 *encoding, u8 **word_
     encoding->elems[0] = MODE_INDICATOR_BYTE;
     (*word_lengths)[0] = MODE_INDICATOR_LEN;
     encoding->elems[1] = text.len;
-    if (version <= 9)       (*word_lengths)[1] = LEN_INDICATOR_BYTE_9_LEN;
-    else if (version <= 26) (*word_lengths)[1] = LEN_INDICATOR_BYTE_26_LEN;
-    else                    (*word_lengths)[1] = LEN_INDICATOR_BYTE_40_LEN;
+    if (version < 9)       (*word_lengths)[1] = LEN_INDICATOR_BYTE_9_LEN;
+    else if (version < 26) (*word_lengths)[1] = LEN_INDICATOR_BYTE_26_LEN;
+    else                   (*word_lengths)[1] = LEN_INDICATOR_BYTE_40_LEN;
 
     for (size_t i = 2; i < encoding->len; i++) {
         encoding->elems[i] = text.chars[i - 2];
@@ -156,13 +156,13 @@ static void encode_byte(String text, u8 version, Array_u16 *encoding, u8 **word_
     }
 }
 
-void encode(String text, u8 version, Mode mode, ECC_Level ecc_level, Array_u16 *encoding, u8 **word_lengths) {
+void encode(String text, u8 version, Mode mode, Array_u16 *encoding, u8 **word_lengths) {
     switch (mode) {
-        case MODE_NUMERIC: 
+        case MODE_NUMERIC:
             encode_numeric(text, version, encoding, word_lengths); break;
-        case MODE_ALPHANUM: 
+        case MODE_ALPHANUM:
             encode_alphanumeric(text, version, encoding, word_lengths); break;
-        case MODE_BYTE: 
+        case MODE_BYTE:
             encode_byte(text, version, encoding, word_lengths); break;
     }
 }
@@ -173,10 +173,10 @@ Array_u8 packed_encoding(String text, Mode encoding_mode, u8 version, ECC_Level 
     Array_u16 encoding;
     size_t bitstring_len, len_diff;
 
-    packed.len = data_codeword_num[version-1][ecc_level];
+    packed.len = data_codeword_num[version][ecc_level];
     packed.elems = malloc(packed.len * sizeof(u8));
 
-    encode(text, version, encoding_mode, ecc_level, &encoding, &word_lengths);
+    encode(text, version, encoding_mode, &encoding, &word_lengths);
 
     bitstring_len = 0;
     for (size_t i = 0; i < encoding.len; i++) {
@@ -193,7 +193,7 @@ Array_u8 packed_encoding(String text, Mode encoding_mode, u8 version, ECC_Level 
 
     for (size_t i = bitstring_len / 8; i < packed.len; i++) {
         if (i % 2 == 0) packed.elems[i] = PAD_BYTE_LEFT;
-        else            packed.elems[i] = PAD_BYTE_RIGHT; 
+        else            packed.elems[i] = PAD_BYTE_RIGHT;
     }
 
     free(encoding.elems);

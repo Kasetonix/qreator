@@ -1,6 +1,7 @@
 #ifndef VIS
 #define VIS
 
+#include "utils.h"
 #include "qrcode_gen.h"
 
 #define DRAW_CHAR      "  "
@@ -21,8 +22,8 @@
 
 #define MARGIN 2
 
-#define EC_RESET   "\e[0m"
-#define EC_INVERSE "\e[7m"
+#define EC_RESET   "\033[0m"
+#define EC_INVERSE "\033[7m"
 
 void draw_qrcode_simple(QR_Code *qrcode);
 void draw_qrcode_small(QR_Code *qrcode);

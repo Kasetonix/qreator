@@ -1,15 +1,13 @@
 #ifndef ENCODING
 #define ENCODING
 
-#include <stdint.h>
-
 #include "utils.h"
 #include "luts.h"
 
 #define MODE_INDICATOR_LEN 4
-#define MODE_INDICATOR_NUMERIC  0b0001
-#define MODE_INDICATOR_ALPHANUM 0b0010
-#define MODE_INDICATOR_BYTE     0b0100
+#define MODE_INDICATOR_NUMERIC  1 // 0b0001
+#define MODE_INDICATOR_ALPHANUM 2 // 0b0010
+#define MODE_INDICATOR_BYTE     4 // 0b0100
 
 #define LEN_INDICATOR_NUMERIC_9_LEN  10
 #define LEN_INDICATOR_NUMERIC_26_LEN 12
@@ -34,8 +32,8 @@
 
 #define MAX_TERMINATOR_LEN 4
 
-#define PAD_BYTE_LEFT  0b11101100
-#define PAD_BYTE_RIGHT 0b00010001
+#define PAD_BYTE_LEFT  236 // 0b11101100
+#define PAD_BYTE_RIGHT 17  // 0b00010001
 
 typedef enum Mode { MODE_NUMERIC, MODE_ALPHANUM, MODE_BYTE } Mode;
 typedef enum ECC_Level { ECC_L, ECC_M, ECC_Q, ECC_H } ECC_Level;

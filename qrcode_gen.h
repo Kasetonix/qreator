@@ -1,15 +1,13 @@
 #ifndef ALGS
 #define ALGS
 
-#include <stdint.h>
 #include <stdlib.h>
 #include <stdbool.h>
 
+#include "utils.h"
 #include "encoding.h"
 
 #define POSDET_MARKER_SIZE 7
-
-typedef uint8_t u8;
 
 typedef struct QR_Code {
     bool **matrix;

@@ -1,7 +1,7 @@
 #ifndef LUTS
 #define LUTS
+
 #include "utils.h"
-#include <stdint.h>
 
 #define ALPHANUM_SPECIAL_NUM 9
 #define VERSION_NUM 40

@@ -22,7 +22,7 @@ static void mult_pol_by_mon(Polynomial *pol, u8 mon_coeff) {
         pol->coeff[i] ^= gf256_mult(pol->coeff[i + 1], mon_coeff);
 }
 
-static Polynomial create_generator_polynomial(u8 version, ECC_Level ecc_level) {
+Polynomial create_generator_polynomial(u8 version, ECC_Level ecc_level) {
     Polynomial gen_pol;
     u8 deg;
 
@@ -37,7 +37,7 @@ static Polynomial create_generator_polynomial(u8 version, ECC_Level ecc_level) {
     return gen_pol;
 }
 
-static u8 * generate_ec_codewords(Array_u8 *encoding, Polynomial *gen_pol) {
+u8 * generate_ec_codewords(Array_u8 *encoding, Polynomial *gen_pol) {
     u8 *ec_codewords;
     u8 gen_offset, steps, top_coeff;
 
@@ -72,7 +72,7 @@ static u8 * generate_ec_codewords(Array_u8 *encoding, Polynomial *gen_pol) {
 }
 
 Array_u8 interleaved_ec_codewords(Array_u8 *encoding, u8 version, ECC_Level ecc_level) {
-    Array_u8 interleaved_ecc, encoding_block;
+    Array_u8 interleaved_eccs, encoding_block;
     u8 **eccs;
     u8 block_number, eccs_per_block;
     u8 *block_div;
@@ -84,12 +84,13 @@ Array_u8 interleaved_ec_codewords(Array_u8 *encoding, u8 version, ECC_Level ecc_
     block_number = block_div[IND_G1_BLOCKS] + block_div[IND_G2_BLOCKS];
     eccs_per_block = ec_codewords_per_block[version][ecc_level];
 
-    interleaved_ecc.len = block_number * eccs_per_block;
-    interleaved_ecc.elems = malloc(interleaved_ecc.len * sizeof(u8));
+    interleaved_eccs.len = block_number * eccs_per_block;
+    interleaved_eccs.elems = malloc(interleaved_eccs.len * sizeof(u8));
 
-    eccs = malloc((block_number) * sizeof(Array_u8));
+    eccs = malloc(block_number * sizeof(Array_u8));
     encoding_block.elems = encoding->elems;
     encoding_block.len = block_div[IND_G1_CODEWORD_PER_BLOCK];
+
     for (u8 i = 0; i < block_div[IND_G1_BLOCKS]; i++) {
         eccs[i] = generate_ec_codewords(&encoding_block, &gen_pol);
         encoding_block.elems += encoding_block.len;
@@ -103,11 +104,11 @@ Array_u8 interleaved_ec_codewords(Array_u8 *encoding, u8 version, ECC_Level ecc_
 
     for (u8 i = 0; i < eccs_per_block; i++)
         for (u8 j = 0; j < block_number; j++)
-            interleaved_ecc.elems[i * block_number + j] = eccs[j][i];
+            interleaved_eccs.elems[i * block_number + j] = eccs[j][i];
 
     for (u8 i = 0; i < block_number; i++)
         free(eccs[i]);
     free(eccs);
     free(gen_pol.coeff);
-    return interleaved_ecc;
+    return interleaved_eccs;
 }

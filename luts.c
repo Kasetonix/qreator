@@ -335,8 +335,8 @@ u8 ec_codewords_per_block[VERSION_NUM][ECC_LEVEL_NUM] = {
 
 u8 block_division[VERSION_NUM][ECC_LEVEL_NUM][4] = {
     {
-        { 1,  16,  0,  0   },
         { 1,  19,  0,  0   },
+        { 1,  16,  0,  0   },
         { 1,  13,  0,  0   },
         { 1,  9,   0,  0   },
     },
@@ -365,8 +365,8 @@ u8 block_division[VERSION_NUM][ECC_LEVEL_NUM][4] = {
         { 2,  11,  2,  12  },
     },
     {
-        { 4,  27,  0,  0   },
         { 2,  68,  0,  0   },
+        { 4,  27,  0,  0   },
         { 4,  19,  0,  0   },
         { 4,  15,  0,  0   },
     },

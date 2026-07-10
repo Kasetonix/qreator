@@ -28,9 +28,9 @@ int main(void) {
     packed_enc = packed_encoding(text, encoding_mode, version, ecc_level);
     iecc = interleaved_ec_codewords(&packed_enc, version, ecc_level);
 
-    puts("Interleaved Error Correction Codes");
+    puts("Interleaved Error Correction Codes:");
     for (size_t i = 0; i < iecc.len; i++) {
-        if (i % 4 == 0) putchar('\n');
+        // if (i % 4 == 0) putchar('\n');
         printf("%03hhu ", iecc.elems[i]);
     } putchar('\n');
 

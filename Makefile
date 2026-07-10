@@ -10,6 +10,9 @@ debug: CFLAGS += -Wall -Wextra -g -pedantic
 debug: LFLAGS += -fsanitize=address
 debug: qreator
 
+gdb: CFLAGS += -Wall -Wextra -g -pedantic
+gdb: qreator
+
 release: CFLAGS += -O3
 release: qreator
 

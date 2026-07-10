@@ -33,11 +33,22 @@ void alloc_qrcode(QR_Code *qrcode) {
     }
 }
 
-QR_Code copy_qrcode(QR_Code *qrcode) {
-    QR_Code copy;
-    u8 **matrix;
+void copy_qrcode_matrix(QR_Code *qrcode, QR_Code *copy) {
+    u8 **orig_matrix, **copy_matrix;
+    size_t size;
+    
+    size = copy->size;
+    orig_matrix = qrcode->matrix;
+    copy_matrix = copy->matrix;
 
-    matrix = qrcode->matrix;
+    for (size_t y = 0; y < size; y++)
+        for (size_t x = 0; x < size; x++)
+            copy_matrix[y][x] = orig_matrix[y][x];
+}
+
+QR_Code copy_qrcode_params(QR_Code *qrcode) {
+    QR_Code copy;
+
     copy.version = qrcode->version;
     copy.size = qrcode->size;
     copy.mode = qrcode->mode;
@@ -45,11 +56,6 @@ QR_Code copy_qrcode(QR_Code *qrcode) {
     copy.matrix = NULL;
 
     alloc_qrcode(&copy);
-
-    for (size_t y = 0; y < copy.size; y++)
-        for (size_t x = 0; x < copy.size; x++)
-            copy.matrix[y][x] = qrcode->matrix[y][x];
-
     return copy;
 }
 
@@ -252,7 +258,7 @@ void add_codewords(QR_Code *qrcode, Array_u8 codewords) {
     for (size_t i = 0; i < codewords.len; i++) {
         codeword = codewords.elems[i];
         for (u8 j = 0; j < 8; j++) {
-            // if (((codeword >> j) & 1) == 1)
+            if (((codeword >> j) & 1) == 1)
                 matrix[pos.y][pos.x] |= ON_MARKER;
             pos = next_module_pos(qrcode, pos);
             if (pos.x == 0 && pos.y == 0 && i != codewords.len - 1 && j != 7)
@@ -297,4 +303,168 @@ void apply_mask(QR_Code *qrcode, u8 mask_number) {
         for (size_t x = 0; x < qrcode->size; x++)
             if (!is_blueprint(qrcode, y, x) && mask_func(y, x))
                 qrcode->matrix[y][x] ^= ON_MARKER;
+}
+
+static u32 calculate_stripe_penalty(QR_Code *qrcode) {
+    u32 penalty;
+    u8 consecutive;
+    u8 **matrix;
+    size_t size;
+    u8 current, last;
+
+    matrix = qrcode->matrix;
+    size = qrcode->size;
+    penalty = 0;
+
+    // Horizontal
+    for (size_t y = 0; y < size; y++) {
+        last = 1;
+        consecutive = 0;
+
+        for (size_t x = 0; x < size; x++) {
+            current = matrix[y][x] >> 1;
+            if (current == last)
+                consecutive++;
+            else {
+                if (consecutive >= 5)
+                    penalty += consecutive - 2;
+                consecutive = 0;
+            }
+
+            last = current;
+        }
+
+        if (consecutive >= 5)
+            penalty += consecutive - 2;
+    }
+
+    // Vertical
+    for (size_t x = 0; x < size; x++) {
+        last = 1;
+        consecutive = 0;
+
+        for (size_t y = 0; y < size; y++) {
+            current = matrix[y][x] >> 1;
+            if (current == last)
+                consecutive++;
+            else {
+                if (consecutive >= 5)
+                    penalty += consecutive - 2;
+                consecutive = 0;
+            }
+
+            last = current;
+        }
+
+        if (consecutive >= 5)
+            penalty += consecutive - 2;
+    }
+
+    return penalty;
+}
+
+static u32 calculate_square_penalty(QR_Code *qrcode) {
+    u32 penalty;
+    u8 square;
+    u8 **matrix;
+    size_t size;
+
+    matrix = qrcode->matrix;
+    size = qrcode->size;
+    penalty = 0;
+
+    for (size_t y = 0; y < size - 1; y++) {
+        square = 0;
+        square |= ((matrix[  y  ][0] >> 1)     );
+        square |= ((matrix[y + 1][0] >> 1) << 1);
+        for (size_t x = 0; x < size - 1; x++) {
+            square |= ((matrix[  y  ][x + 1] >> 1) << 2);
+            square |= ((matrix[y + 1][x + 1] >> 1) << 3);
+
+            if (square == 15 || square == 0) // 0b1111 or 0b0000
+                penalty += 3;
+            
+            square >>= 2;
+        }
+    }
+
+    return penalty;
+}
+
+static u32 calculate_finder_pattern_penalty(QR_Code *qrcode) {
+    u32 penalty;
+    u16 stripe;
+    u8 **matrix;
+    size_t size;
+
+    matrix = qrcode->matrix;
+    size = qrcode->size;
+    penalty = 0;
+
+    for (size_t y = 0; y < size; y++) {
+        stripe = 0;
+        for (u8 i = 0; i < 10; i++) {
+            stripe |= ((matrix[y][i] >> 1) << i);
+        }
+
+        for (size_t x = 10; x < size; x++) {
+            stripe |= ((matrix[y][x] >> 1) << 10);
+            if (stripe == 1488 || stripe == 93) // 0b10111010000 or 0b00001011101
+                penalty += 40;
+            
+            stripe >>= 1;
+        }
+    }
+
+    for (size_t x = 0; x < size; x++) {
+        stripe = 0;
+        for (u8 i = 0; i < 10; i++) {
+            stripe |= ((matrix[i][x] >> 1) << i);
+        }
+
+        for (size_t y = 10; y < size; y++) {
+            stripe |= ((matrix[y][x] >> 1) << 10);
+            if (stripe == 1488 || stripe == 93) // 0b10111010000 or 0b00001011101
+                penalty += 40;
+
+            stripe >>= 1;
+        }
+    }
+
+    return penalty;
+}
+
+static u32 calculate_ratio_penalty(QR_Code *qrcode) {
+    u16 dark_modules, all_modules;
+    u8 percentage, down_dev, up_dev;
+    u8 **matrix;
+    size_t size;
+
+    matrix = qrcode->matrix;
+    size = qrcode->size;
+    all_modules = size * size;
+    dark_modules = 0;
+
+    for (size_t y = 0; y < size; y++)
+        for (size_t x = 0; x < size; x++)
+            if ((matrix[y][x] >> 1) == 1)
+                dark_modules++;
+
+    percentage = dark_modules * 100 / all_modules; 
+
+    down_dev = absval(50 - (percentage - (percentage % 5)));
+    up_dev = absval(50 - (percentage + (5 - percentage % 5)));
+
+    return 2 * (up_dev <= down_dev ? up_dev : down_dev);
+}
+
+u32 calculate_penalty(QR_Code *qrcode) {
+    u32 p_stripe, p_square, p_finder_pattern, p_ratio;
+
+    p_stripe = calculate_stripe_penalty(qrcode);
+    p_square = calculate_square_penalty(qrcode);
+    p_finder_pattern = calculate_finder_pattern_penalty(qrcode);
+    p_ratio = calculate_ratio_penalty(qrcode);
+
+    return p_stripe + p_square + p_finder_pattern + p_ratio;
 }

@@ -11,6 +11,10 @@ void error(char *msg) {
     exit(1);
 }
 
+inline u8 absval(i8 num) {
+    return num >= 0 ? (u8) num : (u8) -num;
+}
+
 size_t len(char *str) {
     size_t i = 0;
     while (str[i] != '\0')

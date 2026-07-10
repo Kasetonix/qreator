@@ -12,7 +12,8 @@
 int main(void) {
     String text;
     Array_u8 packed_data_codewords, codewords;
-    u8 qrcode_version;
+    u8 qrcode_version, chosen_mask;
+    u32 penalty, min_penalty;
     Mode encoding_mode;
     ECC_Level ecc_level;
     QR_Code qrcode, masked_qrcode;
@@ -33,12 +34,33 @@ int main(void) {
     alloc_qrcode(&qrcode);
     create_qrcode_blueprint(&qrcode);
     add_codewords(&qrcode, codewords);
-    masked_qrcode = copy_qrcode(&qrcode);
-    apply_mask(&masked_qrcode, 0);
+
+    masked_qrcode = copy_qrcode_params(&qrcode);
+    min_penalty = UINT32_MAX;
+    for (u8 i = 0; i < MASK_NUMBER; i++) {
+        copy_qrcode_matrix(&qrcode, &masked_qrcode);
+        apply_mask(&masked_qrcode, i);
+        penalty = calculate_penalty(&masked_qrcode);
+        if (penalty < min_penalty) {
+            min_penalty = penalty;
+            chosen_mask = i;
+        }
+
+        // remove_touch_markers(&masked_qrcode);
+        // printf("[MASK: %hhu || PENALTY: %04u]\n", i + 1, penalty);
+        // draw_qrcode_small(&masked_qrcode);
+        // putchar('\n');
+    }
+
+    for (size_t i = 0; i < masked_qrcode.size; i++)
+        free(masked_qrcode.matrix[i]);
+    free(masked_qrcode.matrix);
+
+    apply_mask(&qrcode, chosen_mask);
+
+    printf("%hhu\n", chosen_mask + 1);
     remove_touch_markers(&qrcode);
-    remove_touch_markers(&masked_qrcode);
     draw_qrcode_small(&qrcode);
-    draw_qrcode_small(&masked_qrcode);
 
     free(codewords.elems);
 
@@ -46,8 +68,5 @@ int main(void) {
         free(qrcode.matrix[i]);
     free(qrcode.matrix);
 
-    for (size_t i = 0; i < masked_qrcode.size; i++)
-        free(masked_qrcode.matrix[i]);
-    free(masked_qrcode.matrix);
     return 0;
 }

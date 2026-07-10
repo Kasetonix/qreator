@@ -7,6 +7,7 @@
 typedef uint8_t u8;
 typedef int8_t i8;
 typedef uint16_t u16;
+typedef uint32_t u32;
 
 typedef struct String {
     char *chars;
@@ -25,6 +26,7 @@ typedef struct Array_u16 {
 
 void warning(char *msg);
 void error(char *msg);
+u8 absval(i8 num);
 size_t len(char *str);
 void read(String *str);
 String pack_into_string(char *str);

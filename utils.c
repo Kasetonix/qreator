@@ -3,13 +3,11 @@
 #include <stdlib.h>
 
 void warning(char *msg) {
-    // fprintf(stdout, "\e[1;33m[WARN ]\e[0m: %s\n", msg);
-    fprintf(stdout, "[WARN ]: %s\n", msg);
+    fprintf(stdout, "\033[1;33m[WARN ]\033[0m: %s\n", msg);
 }
 
 void error(char *msg) {
-    // fprintf(stderr, "\e[1;31m[ERROR]\e[0m: %s\n", msg);
-    fprintf(stderr, "[ERROR]: %s\n", msg);
+    fprintf(stderr, "\033[1;31m[ERROR]\033[0m: %s\n", msg);
     exit(1);
 }
 

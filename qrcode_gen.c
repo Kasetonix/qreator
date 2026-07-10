@@ -7,6 +7,7 @@
 #include "encoding.h"
 #include "luts.h"
 #include "utils.h"
+#include "vis.h"
 
 void init_qrcode(QR_Code *qrcode, u8 version, Mode mode, ECC_Level ecc_level) {
     if (version >= 40)     error("Invalid QR code version.");
@@ -58,9 +59,9 @@ static void add_position_detection(QR_Code *qrcode) {
 
     for (size_t y = 0; y < POSDET_MARKER_SIZE + 1; y++) {
         for (size_t x = 0; x < POSDET_MARKER_SIZE + 1; x++) {
-            matrix[y][x]            |= TOUCH_MARKER;
-            matrix[y][size - x - 1] |= TOUCH_MARKER;
-            matrix[size - y - 1][x] |= TOUCH_MARKER;
+            matrix[y][x]            |= BLUEPRINT_MARKER;
+            matrix[y][size - x - 1] |= BLUEPRINT_MARKER;
+            matrix[size - y - 1][x] |= BLUEPRINT_MARKER;
         }
     }
 }
@@ -72,8 +73,8 @@ static void add_timing_patterns(QR_Code *qrcode) {
     matrix = qrcode->matrix;
 
     for (size_t i = POSDET_MARKER_SIZE + 1; i < size - POSDET_MARKER_SIZE - 1; i++) {
-        matrix[POSDET_MARKER_SIZE - 1][i] |= TOUCH_MARKER;
-        matrix[i][POSDET_MARKER_SIZE - 1] |= TOUCH_MARKER;
+        matrix[POSDET_MARKER_SIZE - 1][i] |= BLUEPRINT_MARKER;
+        matrix[i][POSDET_MARKER_SIZE - 1] |= BLUEPRINT_MARKER;
         if (i % 2 == 0) {
             matrix[POSDET_MARKER_SIZE - 1][i] |= ON_MARKER;
             matrix[i][POSDET_MARKER_SIZE - 1] |= ON_MARKER;
@@ -87,7 +88,7 @@ static bool is_ap_placable(QR_Code *qrcode, size_t y, size_t x) {
 
     for (ssize_t dy = -ALPAT_MARKER_SIZE / 2; dy <= ALPAT_MARKER_SIZE / 2; dy++)
         for (ssize_t dx = -ALPAT_MARKER_SIZE / 2; dx <= ALPAT_MARKER_SIZE / 2; dx++)
-            if ((matrix[y + dy][x + dx] & TOUCH_MARKER) == TOUCH_MARKER) return false;
+            if ((matrix[y + dy][x + dx] & BLUEPRINT_MARKER) == BLUEPRINT_MARKER) return false;
 
     return true;
 }
@@ -100,7 +101,7 @@ static void draw_ap(QR_Code *qrcode, size_t y, size_t x) {
 
     for (ssize_t dy = -ALPAT_MARKER_SIZE / 2; dy <= ALPAT_MARKER_SIZE / 2; dy++) {
         for (ssize_t dx = -ALPAT_MARKER_SIZE / 2; dx <= ALPAT_MARKER_SIZE / 2; dx++) {
-            matrix[y + dy][x + dx] |= TOUCH_MARKER;
+            matrix[y + dy][x + dx] |= BLUEPRINT_MARKER;
             if (dx == -ALPAT_MARKER_SIZE / 2 || dx == ALPAT_MARKER_SIZE / 2)
                 matrix[y + dy][x + dx] |= ON_MARKER;
             if (dy == -ALPAT_MARKER_SIZE / 2 || dy == ALPAT_MARKER_SIZE / 2)
@@ -126,7 +127,7 @@ static void add_alignment_patterns(QR_Code *qrcode) {
 }
 
 static inline void add_dark_module(QR_Code *qrcode) {
-    qrcode->matrix[qrcode->size - 8][8] |= ON_MARKER | TOUCH_MARKER;
+    qrcode->matrix[qrcode->size - 8][8] |= ON_MARKER | BLUEPRINT_MARKER;
 }
 
 static void touch_format_area(QR_Code *qrcode) {
@@ -137,16 +138,16 @@ static void touch_format_area(QR_Code *qrcode) {
     matrix = qrcode->matrix;
 
     for (size_t y = 0; y < POSDET_MARKER_SIZE + 2; y++)
-        matrix[y][POSDET_MARKER_SIZE + 1] |= TOUCH_MARKER;
+        matrix[y][POSDET_MARKER_SIZE + 1] |= BLUEPRINT_MARKER;
 
     for (size_t y = size - POSDET_MARKER_SIZE - 1; y < size; y++)
-        matrix[y][POSDET_MARKER_SIZE + 1] |= TOUCH_MARKER;
+        matrix[y][POSDET_MARKER_SIZE + 1] |= BLUEPRINT_MARKER;
 
     for (size_t x = 0; x < POSDET_MARKER_SIZE + 2; x++)
-        matrix[POSDET_MARKER_SIZE + 1][x] |= TOUCH_MARKER;
+        matrix[POSDET_MARKER_SIZE + 1][x] |= BLUEPRINT_MARKER;
 
     for (size_t x = size - POSDET_MARKER_SIZE - 1; x < size; x++)
-        matrix[POSDET_MARKER_SIZE + 1][x] |= TOUCH_MARKER;
+        matrix[POSDET_MARKER_SIZE + 1][x] |= BLUEPRINT_MARKER;
 }
 
 static void touch_version_area(QR_Code *qrcode) {
@@ -158,11 +159,11 @@ static void touch_version_area(QR_Code *qrcode) {
     
     for (size_t y = 0; y < POSDET_MARKER_SIZE - 1; y++)
         for (size_t x = 0; x < VER_WIDTH; x++)
-            matrix[y][size - POSDET_MARKER_SIZE - 2 - x] |= TOUCH_MARKER;
+            matrix[y][size - POSDET_MARKER_SIZE - 2 - x] |= BLUEPRINT_MARKER;
 
     for (size_t y = 0; y < VER_WIDTH; y++)
         for (size_t x = 0; x < POSDET_MARKER_SIZE - 1; x++)
-            matrix[size - POSDET_MARKER_SIZE - 2 - y][x] |= TOUCH_MARKER;
+            matrix[size - POSDET_MARKER_SIZE - 2 - y][x] |= BLUEPRINT_MARKER;
 }
 
 void create_qrcode_blueprint(QR_Code *qrcode) {
@@ -173,6 +174,69 @@ void create_qrcode_blueprint(QR_Code *qrcode) {
     touch_format_area(qrcode);
     if (qrcode->version >= 6)
         touch_version_area(qrcode);
+}
+
+static Pos next_module_pos(QR_Code *qrcode, Pos pos) {
+    static bool upwards = true;
+    static bool horizontal = false;
+    static bool switching = false;
+    Pos np = pos;
+
+    do {
+        horizontal = !horizontal;
+
+        if (upwards && np.y == 0) {
+            upwards = false;
+            switching = true;
+        }
+
+        if (!upwards && np.y == (ssize_t) qrcode->size - 1) {
+            upwards = true;
+            switching = true;
+        }
+
+        // Vertical timing pattern
+        if (np.x == POSDET_MARKER_SIZE - 1)
+            np.x--;
+
+        if (!horizontal && switching) {
+            switching = false;
+            np.x--;
+        } else if (horizontal) {
+            np.x--;
+        } else {
+            np.x++;
+            if (upwards) np.y--;
+            else         np.y++;
+        }
+
+        if (np.y < 0 || np.y >= (ssize_t) qrcode->size ||
+            np.x < 0 || np.x >= (ssize_t) qrcode->size) {
+            return (Pos) { .y = 0, .x = 0 };
+        }
+    } while ((qrcode->matrix[np.y][np.x] & BLUEPRINT_MARKER) == BLUEPRINT_MARKER);
+
+    return np;
+}
+
+void add_codewords(QR_Code *qrcode, Array_u8 codewords) {
+    Pos pos = { .y = qrcode->size - 1, .x = qrcode->size - 1 };
+    u8 **matrix;
+    u8 codeword;
+
+    matrix = qrcode->matrix;
+
+    for (size_t i = 0; i < codewords.len; i++) {
+        codeword = codewords.elems[i];
+        for (u8 j = 0; j < 8; j++) {
+            if (((codeword >> j) & 1) == 1)
+                matrix[pos.y][pos.x] |= ON_MARKER;
+            pos = next_module_pos(qrcode, pos);
+            if (pos.x == 0 && pos.y == 0 && i != codewords.len - 1 && j != 7) {
+                error("Went out of the qr code when writing codewords!");
+            }
+        }
+    }
 }
 
 void remove_touch_markers(QR_Code *qrcode) {

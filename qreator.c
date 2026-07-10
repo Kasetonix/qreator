@@ -26,21 +26,14 @@ int main(void) {
     packed_data_codewords = packed_encoding(text, encoding_mode, qrcode_version, ecc_level);
     codewords = final_codewords(&packed_data_codewords, qrcode_version, ecc_level);
 
-    // puts("Final codewords:");
-    // for (size_t i = 0; i < codewords.len; i++) {
-    //     printf("%08b\n", codewords.elems[i]);
-    // }
-
     free(text.chars);
     free(packed_data_codewords.elems);
 
     init_qrcode(&qrcode, qrcode_version, encoding_mode, ecc_level);
     alloc_qrcode(&qrcode);
     create_qrcode_blueprint(&qrcode);
-    puts("TOUCH MARKERS:");
-    draw_qrcode_small(&qrcode);
+    add_codewords(&qrcode, codewords);
     remove_touch_markers(&qrcode);
-    puts("QR CODE:");
     draw_qrcode_small(&qrcode);
 
     free(codewords.elems);

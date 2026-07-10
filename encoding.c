@@ -59,7 +59,12 @@ static void encode_numeric(String text, u8 version, Array_u16 *encoding, u8 **wo
     leftover = text.len % NUMERIC_GROUP_SIZE;
     encoding->len = 2 + text.len / NUMERIC_GROUP_SIZE + (leftover > 0 ? 1 : 0);
     encoding->elems = malloc(encoding->len * sizeof(u16));
+    if (encoding->elems == NULL)
+        error("Couldn't allocate memory for encoding array.");
+
     *word_lengths = malloc(encoding->len * sizeof(u8));
+    if (*word_lengths == NULL)
+        error("Couldn't allocate memory for word length array.");
 
     encoding->elems[0] = MODE_INDICATOR_NUMERIC;
     (*word_lengths)[0] = MODE_INDICATOR_LEN;
@@ -115,7 +120,12 @@ static void encode_alphanumeric(String text, u8 version, Array_u16 *encoding, u8
 
     encoding->len = 2 + text.len / ALPHANUM_GROUP_SIZE + leftover;
     encoding->elems = malloc(encoding->len * sizeof(u16));
+    if (encoding->elems == NULL)
+        error("Couldn't allocate memory for encoding array.");
+
     *word_lengths = malloc(encoding->len * sizeof(u8));
+    if (*word_lengths == NULL)
+        error("Couldn't allocate memory for word length array.");
 
     encoding->elems[0] = MODE_INDICATOR_ALPHANUM;
     (*word_lengths)[0] = MODE_INDICATOR_LEN;
@@ -141,7 +151,12 @@ static void encode_alphanumeric(String text, u8 version, Array_u16 *encoding, u8
 static void encode_byte(String text, u8 version, Array_u16 *encoding, u8 **word_lengths) {
     encoding->len = 2 + text.len;
     encoding->elems = malloc(text.len * sizeof(u16));
+    if (encoding->elems == NULL)
+        error("Couldn't allocate memory for encoding array.");
+
     *word_lengths = malloc(text.len * sizeof(u8));
+    if (*word_lengths == NULL)
+        error("Couldn't allocate memory for word length array.");
 
     encoding->elems[0] = MODE_INDICATOR_BYTE;
     (*word_lengths)[0] = MODE_INDICATOR_LEN;
@@ -175,6 +190,8 @@ Array_u8 packed_encoding(String text, Mode encoding_mode, u8 version, ECC_Level 
 
     packed.len = data_codeword_num[version][ecc_level];
     packed.elems = calloc(packed.len, sizeof(u8));
+    if (packed.elems == NULL)
+        error("Couldn't allocate memory for packed encoding array.");
 
     encode(text, version, encoding_mode, &encoding, &word_lengths);
 

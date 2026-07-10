@@ -29,6 +29,8 @@ static Polynomial create_generator_polynomial(u8 version, ECC_Level ecc_level) {
     deg = ec_codewords_per_block[version][ecc_level];
     gen_pol.degree = deg;
     gen_pol.coeff = calloc(gen_pol.degree, sizeof(u8));
+    if (gen_pol.coeff == NULL)
+        error("Couldn't allocate memory for generator polynomial.");
 
     gen_pol.degree = 0;
     for (u8 i = 0; i < deg; i++)
@@ -47,11 +49,16 @@ static u8 * generate_ec_codewords(Array_u8 *encoding, Polynomial *gen_pol) {
     Polynomial msg_pol;
     msg_pol.degree = encoding->len - 1 + gen_pol->degree;
     msg_pol.coeff = calloc(msg_pol.degree + 1, sizeof(u8));
+    if (msg_pol.coeff == NULL)
+        error("Couldn't allocate memory for message polynomial.");
+
     for (u8 i = gen_pol->degree; i <= msg_pol.degree; i++) {
         msg_pol.coeff[i] = encoding->elems[msg_pol.degree - i];
     }
 
     ec_codewords = malloc(gen_pol->degree * sizeof(u8));
+    if (ec_codewords == NULL)
+        error("Couldn't allocate memory for error correction codewords.");
 
     for (u8 step = 0; step < steps; step++) {
         gen_offset = msg_pol.degree - gen_pol->degree;
@@ -86,8 +93,13 @@ static Array_u8 interleaved_ec_codewords(Array_u8 *data_codewords, u8 version, E
 
     interleaved_eccs.len = block_number * eccs_per_block;
     interleaved_eccs.elems = malloc(interleaved_eccs.len * sizeof(u8));
+    if (interleaved_eccs.elems == NULL)
+        error("Couldn't allocate memory for interleaved error correction codewords.");
 
     eccs = malloc(block_number * sizeof(Array_u8));
+    if (eccs == NULL)
+        error("Couldn't allocate memory for error correction codeword array for interleaving.");
+
     dc_block.elems = data_codewords->elems;
     dc_block.len = block_div[IND_G1_CODEWORD_PER_BLOCK];
 
@@ -128,6 +140,8 @@ static Array_u8 interleaved_data_codewords(Array_u8 *data_codewords, u8 version,
 
     interleaved_dcs.len = data_codewords->len;
     interleaved_dcs.elems = malloc(interleaved_dcs.len * sizeof(u8));
+    if (interleaved_dcs.elems == NULL)
+        error("Couldn't allocate memory for interleaved data codewords.");
 
     i = 0;
     for (u8 col = 0; col < col_number; col++) {
@@ -158,14 +172,15 @@ Array_u8 final_codewords(Array_u8 *data_codewords, u8 version, ECC_Level ecc_lev
     iecc = interleaved_ec_codewords(data_codewords, version, ecc_level);
     idc  = interleaved_data_codewords(data_codewords, version, ecc_level);
 
-    codewords.len = iecc.len + idc.len + 1;
+    codewords.len = iecc.len + idc.len;
     codewords.elems = malloc(codewords.len * sizeof(u8));
+    if (codewords.elems == NULL)
+        error("Couldn't allocate memory for final codeword array.");
 
     for (size_t i = 0; i < idc.len; i++)
         codewords.elems[i] = idc.elems[i];
     for (size_t i = 0; i < iecc.len; i++)
         codewords.elems[i + idc.len] = iecc.elems[i];
-    codewords.elems[codewords.len - 1] = 0;
 
     free(iecc.elems);
     free(idc.elems);

@@ -34,6 +34,8 @@ String pack_into_string(char *str) {
     String string;
     string.len = len(str);
     string.chars = malloc(string.len * sizeof(char));
+    if (string.chars == NULL)
+        error("Couldn't allocate memory for a string.");
 
     for (size_t i = 0; i < string.len; i++)
         string.chars[i] = str[i];

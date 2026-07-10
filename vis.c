@@ -6,6 +6,9 @@
 
 static char * monostring(char ch, size_t len) {
     char *str = malloc(len * sizeof(char));
+    if (str == NULL)
+        error("Couldn't allocate memory for a monostring");
+
     for (size_t i = 0; i < len; i++)
         str[i] = ch;
     return str;
@@ -13,6 +16,9 @@ static char * monostring(char ch, size_t len) {
 
 static char * monostring_end(char ch, size_t len, char end_char, size_t end_len) {
     char *str = malloc((len + 2 * end_len) * sizeof(char));
+    if (str == NULL)
+        error("Couldn't allocate memory for a monostring");
+
     for (size_t i = 0; i < end_len; i++)
         str[i] = end_char;
     for (size_t i = end_len; i < len + end_len; i++)

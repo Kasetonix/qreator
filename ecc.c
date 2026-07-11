@@ -81,7 +81,7 @@ static u8 * generate_ec_codewords(Array_u8 *encoding, Polynomial *gen_pol) {
 static Array_u8 interleaved_ec_codewords(Array_u8 *data_codewords, u8 version, ECC_Level ecc_level) {
     Array_u8 interleaved_eccs, dc_block;
     u8 **eccs;
-    u8 block_number, eccs_per_block;
+    size_t block_number, eccs_per_block;
     u8 *block_div;
     Polynomial gen_pol;
 
@@ -103,22 +103,22 @@ static Array_u8 interleaved_ec_codewords(Array_u8 *data_codewords, u8 version, E
     dc_block.elems = data_codewords->elems;
     dc_block.len = block_div[IND_G1_CODEWORD_PER_BLOCK];
 
-    for (u8 i = 0; i < block_div[IND_G1_BLOCKS]; i++) {
+    for (size_t i = 0; i < block_div[IND_G1_BLOCKS]; i++) {
         eccs[i] = generate_ec_codewords(&dc_block, &gen_pol);
         dc_block.elems += dc_block.len;
     }
 
     dc_block.len = block_div[IND_G2_CODEWORD_PER_BLOCK];
-    for (u8 i = block_div[IND_G1_BLOCKS]; i < block_number; i++) {
+    for (size_t i = block_div[IND_G1_BLOCKS]; i < block_number; i++) {
         eccs[i] = generate_ec_codewords(&dc_block, &gen_pol);
         dc_block.elems += dc_block.len;
     }
 
-    for (u8 i = 0; i < eccs_per_block; i++)
-        for (u8 j = 0; j < block_number; j++)
+    for (size_t i = 0; i < eccs_per_block; i++)
+        for (size_t j = 0; j < block_number; j++)
             interleaved_eccs.elems[i * block_number + j] = eccs[j][i];
 
-    for (u8 i = 0; i < block_number; i++)
+    for (size_t i = 0; i < block_number; i++)
         free(eccs[i]);
     free(eccs);
     free(gen_pol.coeff);
@@ -127,7 +127,7 @@ static Array_u8 interleaved_ec_codewords(Array_u8 *data_codewords, u8 version, E
 
 static Array_u8 interleaved_data_codewords(Array_u8 *data_codewords, u8 version, ECC_Level ecc_level) {
     Array_u8 interleaved_dcs;
-    u8 i, block_number, col_number;
+    size_t i, block_number, col_number;
     u8 *block_div, *dc_ptr;
     
     block_div = block_division[version][ecc_level];
@@ -144,9 +144,9 @@ static Array_u8 interleaved_data_codewords(Array_u8 *data_codewords, u8 version,
         error("Couldn't allocate memory for interleaved data codewords.");
 
     i = 0;
-    for (u8 col = 0; col < col_number; col++) {
+    for (size_t col = 0; col < col_number; col++) {
         dc_ptr = &data_codewords->elems[col];
-        for (u8 block_ind = 0; block_ind < block_div[IND_G1_BLOCKS]; block_ind++) {
+        for (size_t block_ind = 0; block_ind < block_div[IND_G1_BLOCKS]; block_ind++) {
             if (col < block_div[IND_G1_CODEWORD_PER_BLOCK]) {
                 interleaved_dcs.elems[i] = *dc_ptr;
                 i++;
@@ -154,7 +154,7 @@ static Array_u8 interleaved_data_codewords(Array_u8 *data_codewords, u8 version,
             dc_ptr += block_div[IND_G1_CODEWORD_PER_BLOCK];
         }
 
-        for (u8 block_ind = block_div[IND_G1_BLOCKS]; block_ind < block_number; block_ind++) {
+        for (size_t block_ind = block_div[IND_G1_BLOCKS]; block_ind < block_number; block_ind++) {
             if (col < block_div[IND_G2_CODEWORD_PER_BLOCK]) {
                 interleaved_dcs.elems[i] = *dc_ptr;
                 i++;

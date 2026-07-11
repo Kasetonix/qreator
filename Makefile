@@ -1,7 +1,6 @@
 CSTD = gnu99
 SRC = utils.c luts.c encoding.c ecc.c qrcode_gen.c vis.c qreator.c
 OBJ = ${SRC:.c=.o}
-# LIBS = -lcurses
 CFLAGS = -std=${CSTD}
 
 all: qreator

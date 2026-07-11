@@ -52,8 +52,7 @@ int main(void) {
         // putchar('\n');
     }
 
-    for (size_t i = 0; i < masked_qrcode.size; i++)
-        free(masked_qrcode.matrix[i]);
+    free(masked_qrcode.matrix[0]);
     free(masked_qrcode.matrix);
 
     apply_mask(&qrcode, chosen_mask);
@@ -63,9 +62,7 @@ int main(void) {
     draw_qrcode_small(&qrcode);
 
     free(codewords.elems);
-
-    for (size_t i = 0; i < qrcode.size; i++)
-        free(qrcode.matrix[i]);
+    free(qrcode.matrix[0]);
     free(qrcode.matrix);
 
     return 0;

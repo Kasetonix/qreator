@@ -20,6 +20,9 @@
 #define FORMAT_ECC_GEN_POL 1335 // 0b10100110111 
 #define FORMAT_ECC_MASK 21522 // 0b101010000010010
 
+#define VERSION_ECC_LEN 12
+#define VERSION_ECC_GEN_POL 7973 // 0b1111100100101
+
 typedef struct QR_Code {
     u8 **matrix;
     size_t size;
@@ -43,5 +46,6 @@ void remove_touch_markers(QR_Code *qrcode);
 void apply_mask(QR_Code *qrcode, u8 mask_number);
 u32 calculate_penalty(QR_Code *qrcode);
 u16 create_format_string(QR_Code *qrcode, u8 chosen_mask);
+u32 create_version_string(QR_Code *qrcode);
 
 #endif

@@ -492,3 +492,24 @@ u16 create_format_string(QR_Code *qrcode, u8 chosen_mask) {
 
     return ((format_string << FORMAT_ECC_LEN) | ecc_bits) ^ FORMAT_ECC_MASK;
 }
+
+u32 create_version_string(QR_Code *qrcode) {
+    u32 version_string, gen_pol, ecc_bits;
+    u8 ecc_bit_len, diff;
+
+    gen_pol = VERSION_ECC_GEN_POL;
+    version_string = qrcode->version + 1;
+
+    ecc_bits = version_string << VERSION_ECC_LEN;
+    ecc_bit_len = bitstring_len(ecc_bits);
+    gen_pol <<= (ecc_bit_len - VERSION_ECC_LEN - 1);
+
+    while (ecc_bit_len > VERSION_ECC_LEN) {
+        ecc_bits ^= gen_pol;
+        diff = ecc_bit_len - bitstring_len(ecc_bits);
+        ecc_bit_len -= diff;
+        gen_pol >>= diff;
+    }
+
+    return (version_string << VERSION_ECC_LEN) | ecc_bits;
+}

@@ -59,6 +59,7 @@ int main(void) {
 
     printf("%hhu\n", chosen_mask + 1);
     printf("format string: %015b\n", create_format_string(&qrcode, chosen_mask));
+    printf("version: %hhu | version string: %018b\n", qrcode.version + 1, create_version_string(&qrcode));
 
     remove_touch_markers(&qrcode);
     draw_qrcode_small(&qrcode);

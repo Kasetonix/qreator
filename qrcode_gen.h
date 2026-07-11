@@ -10,12 +10,16 @@
 #define BLUEPRINT_MARKER 1
 #define ON_MARKER 2
 
+#define VERSION_MARKER_THRESHOLD 6
+
 #define POSDET_MARKER_SIZE 7
 #define ALPAT_MARKER_SIZE 5
+#define VER_LENGTH 6
 #define VER_WIDTH 3
 
 #define MASK_NUMBER 8
 
+#define FORMAT_LEN 15
 #define FORMAT_ECC_LEN 10
 #define FORMAT_ECC_GEN_POL 1335 // 0b10100110111 
 #define FORMAT_ECC_MASK 21522 // 0b101010000010010
@@ -29,6 +33,7 @@ typedef struct QR_Code {
     u8 version;
     Mode mode;
     ECC_Level ecc_level;
+    u8 mask;
 } QR_Code;
 
 typedef struct Pos {
@@ -45,7 +50,9 @@ void add_codewords(QR_Code *qrcode, Array_u8 codewords);
 void remove_touch_markers(QR_Code *qrcode);
 void apply_mask(QR_Code *qrcode, u8 mask_number);
 u32 calculate_penalty(QR_Code *qrcode);
-u16 create_format_string(QR_Code *qrcode, u8 chosen_mask);
+u16 create_format_string(QR_Code *qrcode);
 u32 create_version_string(QR_Code *qrcode);
+void add_format_string(QR_Code *qrcode);
+void add_version_string(QR_Code *qrcode);
 
 #endif

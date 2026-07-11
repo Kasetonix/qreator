@@ -7,6 +7,7 @@
 #include "encoding.h"
 #include "luts.h"
 #include "utils.h"
+#include "vis.h"
 
 void init_qrcode(QR_Code *qrcode, u8 version, Mode mode, ECC_Level ecc_level) {
     if (version >= 40)     error("Invalid QR code version.");
@@ -17,6 +18,7 @@ void init_qrcode(QR_Code *qrcode, u8 version, Mode mode, ECC_Level ecc_level) {
     qrcode->size = 17 + 4 * (version + 1);
     qrcode->mode = mode;
     qrcode->ecc_level = ecc_level;
+    qrcode->mask = 8;
     qrcode->matrix = NULL;
 }
 
@@ -154,7 +156,7 @@ static void add_alignment_patterns(QR_Code *qrcode) {
 }
 
 static inline void add_dark_module(QR_Code *qrcode) {
-    qrcode->matrix[qrcode->size - 8][8] |= ON_MARKER | BLUEPRINT_MARKER;
+    qrcode->matrix[qrcode->size - 7][8] |= ON_MARKER | BLUEPRINT_MARKER;
 }
 
 static void touch_format_area(QR_Code *qrcode) {
@@ -284,8 +286,10 @@ static inline bool mask5_func(size_t y, size_t x) { return ((y * x) % 2) + ((y *
 static inline bool mask6_func(size_t y, size_t x) { return (((y * x) % 2) + ((y * x) % 3)) % 2 == 0; }
 static inline bool mask7_func(size_t y, size_t x) { return (((y + x) % 2) + ((y * x) % 3)) % 2 == 0; }
 
+
 void apply_mask(QR_Code *qrcode, u8 mask_number) {
     bool (*mask_func)(size_t, size_t);
+    qrcode->mask = mask_number;
 
     if (mask_number >= MASK_NUMBER)
         error("Incorrect mask number.");
@@ -471,13 +475,13 @@ u32 calculate_penalty(QR_Code *qrcode) {
     return p_stripe + p_square + p_finder_pattern + p_ratio;
 }
 
-u16 create_format_string(QR_Code *qrcode, u8 chosen_mask) {
+u16 create_format_string(QR_Code *qrcode) {
     u16 format_string, gen_pol, ecc_bits;
     u8 ecc_level_code, ecc_bit_len, diff; 
 
     gen_pol = FORMAT_ECC_GEN_POL; 
     ecc_level_code = 2 * (qrcode->ecc_level / 2) + (qrcode->ecc_level + 1) % 2;
-    format_string = (ecc_level_code << 3) | chosen_mask;
+    format_string = (ecc_level_code << 3) | qrcode->mask;
     
     ecc_bits = format_string << FORMAT_ECC_LEN;
     ecc_bit_len = bitstring_len(ecc_bits);
@@ -494,6 +498,9 @@ u16 create_format_string(QR_Code *qrcode, u8 chosen_mask) {
 }
 
 u32 create_version_string(QR_Code *qrcode) {
+    if (qrcode->version < VERSION_MARKER_THRESHOLD)
+        error("Version string is undefined for QR codes versions lower than 7.");
+
     u32 version_string, gen_pol, ecc_bits;
     u8 ecc_bit_len, diff;
 
@@ -513,3 +520,42 @@ u32 create_version_string(QR_Code *qrcode) {
 
     return (version_string << VERSION_ECC_LEN) | ecc_bits;
 }
+
+void add_format_string(QR_Code *qrcode) {
+    u8 **matrix;
+    size_t size;
+    u16 format_string;
+
+    matrix = qrcode->matrix;
+    size = qrcode->size;
+    format_string = create_format_string(qrcode);
+
+    printf("format string: %015b\n", format_string);
+    // Horizontal
+    for (u8 i = 0; i <= 5; i++) {
+        if ((format_string >> (FORMAT_LEN - 1 - i) & 1) == 1)
+            matrix[POSDET_MARKER_SIZE + 1][i] |= ON_MARKER;
+    }
+    for (u8 i = 6; i <= 7; i++) {
+        if ((format_string >> (FORMAT_LEN - 1 - i) & 1) == 1)
+            matrix[POSDET_MARKER_SIZE + 1][i + 1] |= ON_MARKER;
+    }
+    for (u8 i = 7; i < FORMAT_LEN; i++) {
+        if ((format_string >> (FORMAT_LEN - 1 - i) & 1) == 1)
+            matrix[POSDET_MARKER_SIZE + 1][size - FORMAT_LEN + i] |= ON_MARKER;
+    }
+
+    // Vertical
+    for (u8 i = 0; i <= 5; i++) {
+        if ((format_string >> (FORMAT_LEN - 1 - i) & 1) == 1)
+            matrix[size - i - 1][POSDET_MARKER_SIZE + 1] |= ON_MARKER;
+    }
+    if ((format_string >> (FORMAT_LEN - 1 - 8) & 1) == 1)
+        matrix[FORMAT_LEN - 8][POSDET_MARKER_SIZE + 1] |= ON_MARKER;
+    for (u8 i = 7; i < FORMAT_LEN; i++) {
+        if ((format_string >> (FORMAT_LEN - 1 - i) & 1) == 1)
+            matrix[FORMAT_LEN - i - 1][POSDET_MARKER_SIZE + 1] |= ON_MARKER;
+    }
+}
+
+void add_version_string(QR_Code *qrcode) {}

@@ -21,7 +21,7 @@ int main(void) {
     // fputs("Enter the message: ", stdout);
     read(&text);
 
-    ecc_level = ECC_M;
+    ecc_level = ECC_Q;
     encoding_mode = get_encoding_mode(text);
     qrcode_version = get_version(text, encoding_mode, ecc_level);
     packed_data_codewords = packed_encoding(text, encoding_mode, qrcode_version, ecc_level);
@@ -56,10 +56,9 @@ int main(void) {
     free(masked_qrcode.matrix);
 
     apply_mask(&qrcode, chosen_mask);
-
-    printf("%hhu\n", chosen_mask + 1);
-    printf("format string: %015b\n", create_format_string(&qrcode, chosen_mask));
-    printf("version: %hhu | version string: %018b\n", qrcode.version + 1, create_version_string(&qrcode));
+    add_format_string(&qrcode);
+    if (qrcode.version >= VERSION_MARKER_THRESHOLD)
+        add_version_string(&qrcode);
 
     remove_touch_markers(&qrcode);
     draw_qrcode_small(&qrcode);

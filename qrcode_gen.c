@@ -262,7 +262,7 @@ void add_codewords(QR_Code *qrcode, Array_u8 codewords) {
     for (size_t i = 0; i < codewords.len; i++) {
         codeword = codewords.elems[i];
         for (u8 j = 0; j < 8; j++) {
-            if (((codeword >> j) & 1) == 1)
+            if (((codeword >> (7 - j)) & 1) == 1)
                 matrix[pos.y][pos.x] |= ON_MARKER;
             pos = next_module_pos(qrcode, pos);
             if (pos.x == 0 && pos.y == 0 && i != codewords.len - 1 && j != 7)
@@ -530,7 +530,6 @@ void add_format_string(QR_Code *qrcode) {
     size = qrcode->size;
     format_string = create_format_string(qrcode);
 
-    printf("format string: %015b\n", format_string);
     // Horizontal
     for (u8 i = 0; i <= 5; i++) {
         if ((format_string >> (FORMAT_LEN - 1 - i) & 1) == 1)

@@ -45,11 +45,6 @@ int main(void) {
             min_penalty = penalty;
             chosen_mask = i;
         }
-
-        // remove_touch_markers(&masked_qrcode);
-        // printf("[MASK: %hhu || PENALTY: %04u]\n", i + 1, penalty);
-        // draw_qrcode_small(&masked_qrcode);
-        // putchar('\n');
     }
 
     free(masked_qrcode.matrix[0]);

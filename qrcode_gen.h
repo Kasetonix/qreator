@@ -16,6 +16,8 @@
 
 #define MASK_NUMBER 8
 
+#define FORMAT_ECC_LEN 10
+
 typedef struct QR_Code {
     u8 **matrix;
     size_t size;
@@ -38,5 +40,6 @@ void add_codewords(QR_Code *qrcode, Array_u8 codewords);
 void remove_touch_markers(QR_Code *qrcode);
 void apply_mask(QR_Code *qrcode, u8 mask_number);
 u32 calculate_penalty(QR_Code *qrcode);
+u16 create_format_string(QR_Code *qrcode, u8 chosen_mask);
 
 #endif

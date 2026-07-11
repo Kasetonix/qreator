@@ -4,7 +4,7 @@
 #include "utils.h"
 #include "qrcode_gen.h"
 
-#define DARK_MODE true
+#define DARK_MODE true 
 
 #define DRAW_CHAR      "  "
 #define SIMPLE_VERTICAL_BAR   '|'
@@ -22,7 +22,7 @@
 #define BOTTOM_LEFT_BORDER "└"
 #define BOTTOM_RIGHT_BORDER "┘"
 
-#define MARGIN 2
+#define MARGIN 4
 
 #define EC_RESET   "\033[0m"
 #define EC_INVERSE "\033[7m"

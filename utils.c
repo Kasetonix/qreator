@@ -74,3 +74,16 @@ void pack_into_bytes(u16 *array, size_t array_len, u8 *word_length, Array_u8 *pa
 inline u8 gf256_mult(u8 a, u8 b) {
     return gf256_antilog2_table[ (gf256_log2_table[a] + gf256_log2_table[b]) % 255 ];
 }
+
+u8 bitstring_len(u32 num) {
+    u8 len = 32;
+    u32 mask = UINT32_MAX; 
+
+    if (num == 0) 
+        return 0;
+    while ((num & mask) == num) {
+        mask >>= 1;
+        len--;
+    }
+    return len + 1;
+}

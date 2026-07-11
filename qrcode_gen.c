@@ -470,3 +470,25 @@ u32 calculate_penalty(QR_Code *qrcode) {
 
     return p_stripe + p_square + p_finder_pattern + p_ratio;
 }
+
+u16 create_format_string(QR_Code *qrcode, u8 chosen_mask) {
+    u16 format_string, gen_pol, ecc_bits;
+    u8 ecc_level_code, ecc_bit_len, diff; 
+
+    gen_pol = 1335; // 0b10100110111
+    ecc_level_code = 2 * (qrcode->ecc_level / 2) + (qrcode->ecc_level + 1) % 2;
+    format_string = (ecc_level_code << 3) | chosen_mask;
+    
+    ecc_bits = format_string << FORMAT_ECC_LEN;
+    ecc_bit_len = bitstring_len(ecc_bits);
+    gen_pol <<= (ecc_bit_len - FORMAT_ECC_LEN - 1);
+
+    while (ecc_bit_len > FORMAT_ECC_LEN) {
+        ecc_bits ^= gen_pol;
+        diff = ecc_bit_len - bitstring_len(ecc_bits);
+        ecc_bit_len -= diff;
+        gen_pol >>= diff;
+    }
+
+    return (format_string << FORMAT_ECC_LEN) | ecc_bits;
+}

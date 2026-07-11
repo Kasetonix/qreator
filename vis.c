@@ -14,19 +14,19 @@ void draw_qrcode_small(QR_Code *qrcode) {
 
     // TOP BORDER
     fputs(TOP_LEFT_BORDER, stdout);
-    for (size_t x = 0; x < size + 2 * MARGIN; x++) {
+    for (size_t x = 0; x < size + 2 * MARGIN; x++)
         fputs(HORIZONTAL_BORDER, stdout);
-    }
     fputs(TOP_RIGHT_BORDER, stdout);
     putchar('\n');
 
     // TOP VERTICAL MARGIN
     for (u8 i = 0; i < MARGIN / 2; i++) {
         fputs(VERTICAL_BORDER, stdout);
-        for (size_t x = 0; x < size + 2 * MARGIN; x++) fputs(EMPTY_BLOCK, stdout);
+        for (size_t x = 0; x < size + 2 * MARGIN; x++)
+            fputs(EMPTY_BLOCK, stdout);
         fputs(VERTICAL_BORDER, stdout);
+        putchar('\n');
     }
-    putchar('\n');
 
     // QR CODE
     for (size_t y = 0; y < size - 1; y += 2) {
@@ -63,8 +63,8 @@ void draw_qrcode_small(QR_Code *qrcode) {
         fputs(VERTICAL_BORDER, stdout);
         for (size_t x = 0; x < size + 2 * MARGIN; x++) fputs(EMPTY_BLOCK, stdout);
         fputs(VERTICAL_BORDER, stdout);
+        putchar('\n');
     }
-    putchar('\n');
 
     // BOTTOM BORDER
     fputs(BOTTOM_LEFT_BORDER, stdout);

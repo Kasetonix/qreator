@@ -17,6 +17,8 @@
 #define MASK_NUMBER 8
 
 #define FORMAT_ECC_LEN 10
+#define FORMAT_ECC_GEN_POL 1335 // 0b10100110111 
+#define FORMAT_ECC_MASK 21522 // 0b101010000010010
 
 typedef struct QR_Code {
     u8 **matrix;

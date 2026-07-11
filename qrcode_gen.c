@@ -475,7 +475,7 @@ u16 create_format_string(QR_Code *qrcode, u8 chosen_mask) {
     u16 format_string, gen_pol, ecc_bits;
     u8 ecc_level_code, ecc_bit_len, diff; 
 
-    gen_pol = 1335; // 0b10100110111
+    gen_pol = FORMAT_ECC_GEN_POL; 
     ecc_level_code = 2 * (qrcode->ecc_level / 2) + (qrcode->ecc_level + 1) % 2;
     format_string = (ecc_level_code << 3) | chosen_mask;
     
@@ -490,5 +490,5 @@ u16 create_format_string(QR_Code *qrcode, u8 chosen_mask) {
         gen_pol >>= diff;
     }
 
-    return (format_string << FORMAT_ECC_LEN) | ecc_bits;
+    return ((format_string << FORMAT_ECC_LEN) | ecc_bits) ^ FORMAT_ECC_MASK;
 }

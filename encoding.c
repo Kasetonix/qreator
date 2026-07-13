@@ -200,11 +200,12 @@ Array_u8 packed_encoding(String text, Mode encoding_mode, u8 version, ECC_Level 
         bitstring_len += word_lengths[i];
     }
 
-    len_diff = packed.len - bitstring_len;
-    if (len_diff > 0) {
+    len_diff = packed.len * 8 - bitstring_len;
+    if (len_diff > 0)
         bitstring_len += len_diff <= MAX_TERMINATOR_LEN ? len_diff : MAX_TERMINATOR_LEN;
-    }
-    bitstring_len += (8 - bitstring_len % 8);
+
+    if (bitstring_len % 8 != 0)
+        bitstring_len += (8 - bitstring_len % 8);
 
     pack_into_bytes(encoding.elems, encoding.len, word_lengths, &packed);
 

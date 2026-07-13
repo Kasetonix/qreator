@@ -137,7 +137,6 @@ static Array_u8 interleaved_data_codewords(Array_u8 *data_codewords, u8 version,
     else
         col_number = block_div[IND_G2_CODEWORD_PER_BLOCK];
 
-
     interleaved_dcs.len = data_codewords->len;
     interleaved_dcs.elems = malloc(interleaved_dcs.len * sizeof(u8));
     if (interleaved_dcs.elems == NULL)
@@ -172,8 +171,8 @@ Array_u8 final_codewords(Array_u8 *data_codewords, u8 version, ECC_Level ecc_lev
     iecc = interleaved_ec_codewords(data_codewords, version, ecc_level);
     idc  = interleaved_data_codewords(data_codewords, version, ecc_level);
 
-    codewords.len = iecc.len + idc.len;
-    codewords.elems = malloc(codewords.len * sizeof(u8));
+    codewords.len = (8 * (iecc.len + idc.len) + remainder_bits[version]) / 8;
+    codewords.elems = calloc(codewords.len, sizeof(u8));
     if (codewords.elems == NULL)
         error("Couldn't allocate memory for final codeword array.");
 

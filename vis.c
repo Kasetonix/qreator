@@ -1,7 +1,3 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdint.h>
-#include <stdbool.h>
 #include "vis.h"
 
 void draw_qrcode_small(QR_Code *qrcode) {

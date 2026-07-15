@@ -1,8 +1,11 @@
 #ifndef ECC
 #define ECC
 
+#include <stdlib.h>
+
 #include "utils.h"
 #include "encoding.h"
+#include "luts.h"
 
 typedef struct Polynomial {
     u8 *coeff;

@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 #include <stdint.h>
+#include <stdlib.h>
 
 typedef uint8_t u8;
 typedef int8_t i8;

@@ -1,13 +1,4 @@
-#include <stdio.h>
-#include <stdint.h>
-#include <stdbool.h>
-#include <stdlib.h>
-
 #include "qrcode_gen.h"
-#include "encoding.h"
-#include "luts.h"
-#include "utils.h"
-#include "vis.h"
 
 void init_qrcode(QR_Code *qrcode, u8 version, Mode mode, ECC_Level ecc_level) {
     if (version >= 40)     error("Invalid QR code version.");

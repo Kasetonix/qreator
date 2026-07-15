@@ -1,11 +1,14 @@
 #ifndef ALGS
 #define ALGS
 
-#include <stdlib.h>
+#include <stdio.h>
+#include <stdint.h>
 #include <stdbool.h>
+#include <stdlib.h>
 
 #include "utils.h"
 #include "encoding.h"
+#include "luts.h"
 
 #define BLUEPRINT_MARKER 1
 #define ON_MARKER 2

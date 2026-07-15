@@ -1,8 +1,8 @@
-#include <stdlib.h>
 #include "ecc.h"
-#include "encoding.h"
-#include "luts.h"
-#include "utils.h"
+
+inline u8 gf256_mult(u8 a, u8 b) {
+    return gf256_antilog2_table[ (gf256_log2_table[a] + gf256_log2_table[b]) % 255 ];
+}
 
 /* Multiplies a polynomial by a monomial of a form (x + mon_coeff) */
 static void mult_pol_by_mon(Polynomial *pol, u8 mon_coeff) {

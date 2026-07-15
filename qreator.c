@@ -1,5 +1,4 @@
 #include <stdbool.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
 
@@ -55,7 +54,6 @@ int main(void) {
     if (qrcode.version >= VERSION_MARKER_THRESHOLD)
         add_version_string(&qrcode);
 
-    remove_touch_markers(&qrcode);
     draw_qrcode_small(&qrcode);
 
     free(codewords.elems);

@@ -1,10 +1,4 @@
-#include <stdbool.h>
-#include <stdint.h>
-#include <stdio.h>
-#include <stdlib.h>
 #include "encoding.h"
-#include "luts.h"
-#include "utils.h"
 
 static inline bool is_numeric(char ch) {
     return ('0' <= ch) && (ch <= '9');

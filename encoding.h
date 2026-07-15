@@ -1,6 +1,9 @@
 #ifndef ENCODING
 #define ENCODING
 
+#include <stdbool.h>
+#include <stdlib.h>
+
 #include "utils.h"
 #include "luts.h"
 

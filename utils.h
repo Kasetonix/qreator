@@ -32,7 +32,6 @@ size_t len(char *str);
 void read(String *str);
 String pack_into_string(char *str);
 void pack_into_bytes(u16 *array, size_t array_len, u8 *word_length, Array_u8 *packed);
-u8 gf256_mult(u8 a, u8 b);
 u8 bitstring_len(u32 num);
 
 #endif

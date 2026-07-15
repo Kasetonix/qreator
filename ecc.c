@@ -1,6 +1,6 @@
 #include "ecc.h"
 
-inline u8 gf256_mult(u8 a, u8 b) {
+static inline u8 gf256_mult(u8 a, u8 b) {
     return gf256_antilog2_table[ (gf256_log2_table[a] + gf256_log2_table[b]) % 255 ];
 }
 

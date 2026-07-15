@@ -50,8 +50,10 @@ void draw_qrcode_small(QR_Code *qrcode) {
     for (u8 i = 0; i < MARGIN; i++) fputs(EMPTY_BLOCK, stdout);
 
     for (size_t x = 0; x < size; x++) {
-        if (matrix[size - 1][x]) fputs(TOP_HALF_BLOCK, stdout);
-        else                     fputs(EMPTY_BLOCK, stdout);
+        if (matrix[size - 1][x] >> 1)
+            fputs(TOP_HALF_BLOCK, stdout);
+        else
+            fputs(EMPTY_BLOCK, stdout);
     }
 
     for (u8 i = 0; i < MARGIN; i++) fputs(EMPTY_BLOCK, stdout);

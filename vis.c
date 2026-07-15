@@ -34,10 +34,14 @@ void draw_qrcode_small(QR_Code *qrcode) {
         for (u8 i = 0; i < MARGIN; i++) fputs(EMPTY_BLOCK, stdout);
 
         for (size_t x = 0; x < size; x++) {
-            if (matrix[y][x] && matrix[y+1][x]) fputs(FULL_BLOCK, stdout);
-            else if (matrix[y][x])              fputs(TOP_HALF_BLOCK, stdout);
-            else if (matrix[y+1][x])            fputs(BOTTOM_HALF_BLOCK, stdout);
-            else                                fputs(EMPTY_BLOCK, stdout);
+            if ((matrix[y][x] >> 1) && (matrix[y+1][x] >> 1))
+                fputs(FULL_BLOCK, stdout);
+            else if (matrix[y][x] >> 1)
+                fputs(TOP_HALF_BLOCK, stdout);
+            else if (matrix[y+1][x] >> 1)
+                fputs(BOTTOM_HALF_BLOCK, stdout);
+            else
+                fputs(EMPTY_BLOCK, stdout);
         }
 
         for (u8 i = 0; i < MARGIN; i++) fputs(EMPTY_BLOCK, stdout);

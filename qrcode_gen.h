@@ -47,7 +47,6 @@ void copy_qrcode_matrix(QR_Code *qrcode, QR_Code *copy);
 QR_Code copy_qrcode_params(QR_Code *qrcode);
 void create_qrcode_blueprint(QR_Code *qrcode);
 void add_codewords(QR_Code *qrcode, Array_u8 codewords);
-void remove_touch_markers(QR_Code *qrcode);
 void apply_mask(QR_Code *qrcode, u8 mask_number);
 u32 calculate_penalty(QR_Code *qrcode);
 u16 create_format_string(QR_Code *qrcode);

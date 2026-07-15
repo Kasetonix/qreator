@@ -271,12 +271,6 @@ void add_codewords(QR_Code *qrcode, Array_u8 codewords) {
     }
 }
 
-void remove_touch_markers(QR_Code *qrcode) {
-    for (size_t y = 0; y < qrcode->size; y++)
-        for (size_t x = 0; x < qrcode->size; x++)
-            qrcode->matrix[y][x] >>= 1;
-}
-
 static inline bool mask0_func(size_t y, size_t x) { return (y + x) % 2 == 0; }
 static inline bool mask1_func(size_t y, size_t x) { x = x; return y % 2 == 0; }
 static inline bool mask2_func(size_t y, size_t x) { y = y; return x % 3 == 0; }

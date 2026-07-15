@@ -1,4 +1,5 @@
 #include <stdbool.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include "encoding.h"
@@ -110,7 +111,7 @@ static u8 encode_alphanumeric_char(char ch) {
         if (ch == alphanumeric_special[i])
             return i + 36;
 
-    return ALPHANUM_SPECIAL_NUM + 36 + 1;
+    return UINT8_MAX;
 }
 
 static void encode_alphanumeric(String text, u8 version, Array_u16 *encoding, u8 **word_lengths) {
@@ -137,6 +138,9 @@ static void encode_alphanumeric(String text, u8 version, Array_u16 *encoding, u8
     for (size_t i = 2; i < encoding->len - leftover; i++) {
         left_char = encode_alphanumeric_char(text.chars[ALPHANUM_GROUP_SIZE * (i - 2)]);
         right_char = encode_alphanumeric_char(text.chars[ALPHANUM_GROUP_SIZE * (i - 2) + 1]);
+        if (left_char == UINT8_MAX || right_char == UINT8_MAX)
+            error("Encountered an unencodable alphanumeric character.");
+
         encoding->elems[i] = 45 * left_char + right_char;
         (*word_lengths)[i] = ALPHANUM_FULLWORD_LEN;
     }

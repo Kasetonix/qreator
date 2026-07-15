@@ -96,7 +96,7 @@ static Array_u8 interleaved_ec_codewords(Array_u8 *data_codewords, u8 version, E
     if (interleaved_eccs.elems == NULL)
         error("Couldn't allocate memory for interleaved error correction codewords.");
 
-    eccs = malloc(block_number * sizeof(Array_u8));
+    eccs = malloc(block_number * sizeof(u8 *));
     if (eccs == NULL)
         error("Couldn't allocate memory for error correction codeword array for interleaving.");
 
@@ -171,7 +171,7 @@ Array_u8 final_codewords(Array_u8 *data_codewords, u8 version, ECC_Level ecc_lev
     iecc = interleaved_ec_codewords(data_codewords, version, ecc_level);
     idc  = interleaved_data_codewords(data_codewords, version, ecc_level);
 
-    codewords.len = (8 * (iecc.len + idc.len) + remainder_bits[version]) / 8;
+    codewords.len = iecc.len + idc.len;
     codewords.elems = calloc(codewords.len, sizeof(u8));
     if (codewords.elems == NULL)
         error("Couldn't allocate memory for final codeword array.");

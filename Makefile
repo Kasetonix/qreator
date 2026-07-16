@@ -5,12 +5,20 @@ CFLAGS = -std=${CSTD}
 
 all: qreator
 
-debug: CFLAGS += -Wall -Wextra -g -pedantic
-debug: LFLAGS += -fsanitize=address
-debug: qreator
+light_asan: CFLAGS += -DLIGHT_MODE 
+light_asan: asan 
 
-gdb: CFLAGS += -Wall -Wextra -g -pedantic
-gdb: qreator
+light_debug: CFLAGS += -DLIGHT_MODE 
+light_debug: debug 
+
+light: CFLAGS += -DLIGHT_MODE 
+light: release
+
+asan: LFLAGS += -fsanitize=address
+asan: debug 
+
+debug: CFLAGS += -Wall -Wextra -g -pedantic
+debug: qreator
 
 release: CFLAGS += -O3
 release: qreator

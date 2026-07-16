@@ -4,8 +4,6 @@
 #include "utils.h"
 #include "qrcode_gen.h"
 
-#define DARK_MODE true 
-
 #define DRAW_CHAR      "  "
 #define SIMPLE_VERTICAL_BAR   '|'
 #define SIMPLE_HORIZONTAL_BAR '-'

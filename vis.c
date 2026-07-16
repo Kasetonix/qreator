@@ -5,8 +5,9 @@ void draw_qrcode_small(QR_Code *qrcode) {
     matrix = qrcode->matrix;
     size = qrcode->size;
 
-    if (DARK_MODE)
-        fputs(EC_INVERSE, stdout);
+    #ifndef LIGHT_MODE 
+    fputs(EC_INVERSE, stdout);
+    #endif
 
     // TOP BORDER
     fputs(TOP_LEFT_BORDER, stdout);
@@ -76,6 +77,7 @@ void draw_qrcode_small(QR_Code *qrcode) {
     fputs(BOTTOM_RIGHT_BORDER, stdout);
     putchar('\n');
 
-    if (DARK_MODE)
-        fputs(EC_RESET, stdout);
+    #ifndef LIGHT_MODE 
+    fputs(EC_RESET, stdout);
+    #endif
 }
